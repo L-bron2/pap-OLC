@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="produto.css">
     <title>novo_produto</title>
 </head>
 <body>
@@ -18,8 +19,20 @@
             </ul>
       </nav>
 
-      
+      <div class="adicionarProdutos">
+        <h1>Novo produto</h1>
+        <form id="formProduto">
+            <input type="text" id="titulo" class="input" placeholder="Título do produto" required />
+            <input type="text" id="descricao" class="input" placeholder="Descrição do produto" required />
+            <input type="number" step="0.01" id="preco" class="input" placeholder="Preço do produto" required />
+            <input type="text" id="categoria" class="input" placeholder="Categoria do produto" required />
+            <input type="text" id="imagem_url" class="input" placeholder="URL da imagem do produto" required />
+            <button type="submit" class="BTN">Adicionar produto</button>
+        </form>
+      </div>
+
     </div>
-    
+
+    <script src="produto.js"></script>
 </body>
 </html>
