@@ -1,3 +1,4 @@
+
 :root {
   /* Cores principais */
   --cor-laranja: #ff6600;
@@ -19,6 +20,85 @@
   --cor-amarelo: #ffcc00;
 }
 
+.adicionarProdutos {
+  background: var(--cor-branco);
+  border: 1.5px solid var(--cor-roxo);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+  max-width: 400px;
+  margin: 40px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}  
+
+.adicionarProdutos h1 {
+  color: var(--cor-roxo);
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+}  
+
+.adicionarProdutos form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}  
+
+/* Inputs e textarea */
+.adicionarProdutos .input,
+.adicionarProdutos .textarea,
+.adicionarProdutos textarea {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 2px solid var(--cor-roxo);
+  padding: 8px 12px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 2px;
+  transition: border-color 0.2s;
+  resize: vertical;
+}  
+.adicionarProdutos .input:focus,
+.adicionarProdutos .textarea:focus,
+.adicionarProdutos textarea:focus {
+  border-color: var(--cor-laranja);
+  outline: none;
+}  
+.adicionarProdutos .input:invalid,
+.adicionarProdutos .textarea:invalid,
+.adicionarProdutos textarea:invalid {
+  border-color: var(--cor-vermelho);
+}  
+
+/* Botão */
+.adicionarProdutos .BTN {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  background-color: var(--cor-laranja);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-top: 8px;
+}  
+.adicionarProdutos .BTN:hover {
+  background-color: var(--cor-roxo);
+}  
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .adicionarProdutos {
+    max-width: 98vw;
+    padding: 16px 4vw;
+  }  
+}  
 
 /* Body */
 body {
@@ -69,4 +149,23 @@ ul.navbar-links li a {
 ul.navbar-links li a:hover {
   cursor: pointer;
   color: var(--cor-laranja);
+}
+
+.alerta {
+  display: flex;                
+  justify-content: center;
+  align-items: center;
+  padding: 12px 24px;
+  width: fit-content;           
+  max-width: 90%;              
+  margin: 15px auto;           
+  border-radius: 8px;
+  text-align: center;
+  color: var(--cor-cinza-escuro);
+  background-color: var(--cor-roxo);
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  position: relative;
+  transition: opacity 0.3s ease;
 }

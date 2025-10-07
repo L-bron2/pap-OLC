@@ -74,7 +74,7 @@ app.post("/produtos", autenticar, (req, res) => {
 
 // Listar produtos
 app.get("/produtos", (req, res) => {
-  db.query("SELECT p.*, u.nome as vendedor FROM produtos p JOIN utilizador u ON p.usuario_id = u.id", (err, results) => {
+  db.query("SELECT p.*, u.nome as  usuario_id FROM produtos p JOIN utilizador u ON p.usuario_id = u.id", (err, results) => {
     if (err) return res.status(500).json(err);
     res.json(results);
   });
