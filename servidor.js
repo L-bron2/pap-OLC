@@ -1,14 +1,37 @@
+// IMPORTS 
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
 
+// CRIAR PASTA UPLOADS SE NÃO EXISTIR
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
+
+// CONFIGURAR MULTER
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
+
+// INICIALIZAR EXPRESS E MIDDLEWARES
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Conexão com MySQL
+// CONEXÃO MYSQL
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -16,25 +39,34 @@ const db = mysql.createConnection({
   database: "OLC"
 });
 
-// Função para verificar token
+// FUNÇÃO AUTENTICAR
 function autenticar(req, res, next) {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(403).json({ erro: "Token não fornecido" });
+  let token = req.headers["authorization"];
+  if (!token) {
+    return res.status(403).json({ erro: "Token não fornecido" });
+  }
+
+  // Aceita tanto "Bearer <token>" quanto só "<token>"
+  if (token.startsWith("Bearer ")) {
+    token = token.slice(7); // remove "Bearer "
+  }
 
   jwt.verify(token, "segredo", (err, decoded) => {
-    if (err) return res.status(401).json({ erro: "Token inválido" });
+    if (err) {
+      console.error("Erro ao verificar token:", err.message);
+      return res.status(401).json({ erro: "Token inválido" });
+    }
     req.userId = decoded.id;
     next();
   });
 }
 
-// Rotas
 
-// Registrar utilizador
+// ROTAS
+// CRIAR UTILIZADORES
 app.post("/usuarios", async (req, res) => {
   const { nome, email, senha } = req.body;
   const hash = await bcrypt.hash(senha, 10);
-
   db.query("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
     [nome, email, hash],
     (err) => {
@@ -43,47 +75,97 @@ app.post("/usuarios", async (req, res) => {
     });
 });
 
-// Login
+// LOGIN
 app.post("/login", (req, res) => {
   const { email, senha } = req.body;
-
   db.query("SELECT * FROM usuarios WHERE email = ?", [email], async (err, results) => {
     if (err || results.length === 0) return res.status(401).json({ erro: "Usuário não encontrado" });
-
     const user = results[0];
     const match = await bcrypt.compare(senha, user.senha);
-
     if (!match) return res.status(401).json({ erro: "Palavra passe incorreta" });
-
     const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
     res.json({ token });
   });
 });
 
-// Criar produto
-app.post("/produtos", autenticar, (req, res) => {
-  const { titulo, descricao, preco, categoria, imagem_url } = req.body;
+// RECUPERAR PALAVRA PASSE
+app.post("/recuperar", async (req, res) => {
+  const { email, nome, novaSenha } = req.body;
 
-  db.query("INSERT INTO produtos (usuario_id, titulo, descricao, preco, categoria, imagem_url) VALUES (?, ?, ?, ?, ?, ?)",
-    [req.userId, titulo, descricao, preco, categoria, imagem_url],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.json({ msg: "Produto criado com sucesso!" });
-    });
+  if (!email || !nome || !novaSenha) {
+    return res.status(400).json({ message: "Preencha todos os campos." });
+  }
+
+  // VERIFICA SE O UTILIZADOR EXISTE
+  const [rows] = await db.promise().query(
+    "SELECT * FROM usuarios WHERE email = ? AND nome = ?",
+    [email, nome]
+  );
+
+  if (rows.length === 0) {
+    return res.status(404).json({ message: "Conta não encontrado." });
+  }
+
+  // ENCIRPTA A NOVA PALAVRA PASSE
+  const hashed = await bcrypt.hash(novaSenha, 10);
+
+  // ATUALIZA NA BASE DE DADOS
+  await db.promise().query(
+    "UPDATE usuarios SET senha = ? WHERE email = ? AND nome = ?",
+    [hashed, email, nome]
+  );
+
+  res.json({ message: "Palavra-passe alterada com sucesso!" });
+})
+
+// CRIAR PRODUTOS
+app.post("/produtos", autenticar, upload.single('imagem'), (req, res) => {
+  const { titulo, descricao, preco, categoria } = req.body;
+  let imagem_url = null;
+
+  if (req.file) {
+    imagem_url = `/uploads/${req.file.filename}`;
+  }
+
+  const sql = `
+    INSERT INTO produtos (usuario_id, titulo, descricao, preco, categoria, imagem_url)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [req.userId, titulo, descricao, preco, categoria, imagem_url], (err, result) => {
+    if (err) {
+      console.error("Erro ao inserir produto:", err);
+      return res.status(500).json({ erro: "Erro ao criar produto" });
+    }
+    res.status(201).json({ msg: "Produto criado com sucesso!", id: result.insertId });
+  });
 });
 
-// Listar produtos
+
+// LISTAR PRODUTOS
 app.get("/produtos", (req, res) => {
-  db.query("SELECT p.*, u.nome as  usuario_id FROM produtos p JOIN utilizador u ON p.usuario_id = u.id", (err, results) => {
-    if (err) return res.status(500).json(err);
+  const sql = `
+    SELECT 
+      p.*, 
+      u.nome AS usuario_nome 
+    FROM produtos p
+    JOIN usuarios u ON p.usuario_id = u.id
+    ORDER BY p.data_publicacao DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Erro ao listar produtos:", err);
+      return res.status(500).json({ erro: "Erro ao listar produtos." });
+    }
     res.json(results);
   });
 });
 
-// Enviar mensagem
+
+// ENVIAR MENSAGENS
 app.post("/mensagens", autenticar, (req, res) => {
   const { destinatario_id, produto_id, mensagem } = req.body;
-
   db.query("INSERT INTO mensagens (remetente_id, destinatario_id, produto_id, mensagem) VALUES (?, ?, ?, ?)",
     [req.userId, destinatario_id, produto_id, mensagem],
     (err) => {
@@ -92,7 +174,7 @@ app.post("/mensagens", autenticar, (req, res) => {
     });
 });
 
-// Inbox
+// INBOX
 app.get("/mensagens", autenticar, (req, res) => {
   db.query("SELECT * FROM mensagens WHERE remetente_id = ? OR destinatario_id = ? ORDER BY data_envio DESC",
     [req.userId, req.userId],
@@ -102,7 +184,5 @@ app.get("/mensagens", autenticar, (req, res) => {
     });
 });
 
-// Iniciar servidor
+// INICIAR SERVIDOR
 app.listen(3000, () => console.log("Servidor rodando em http://localhost:3000"));
-
-

@@ -1,111 +1,34 @@
+/* ===========================
+   produto.css (versão melhorada)
+   =========================== */
 
+/* Paleta de cores */
 :root {
-  /* Cores principais */
   --cor-laranja: #ff6600;
   --cor-verde: #00cc66;
   --cor-roxo: #8c4cff;
-
-  /* Cores secundárias */
-  --cor-cinza-escuro: #333333; /* cor texto */
+  --cor-cinza-escuro: #333333;
   --cor-cinza-medio: #666666;
   --cor-cinza-claro: #eeeeee;
-
-  /* Cores de fundo */
   --cor-branco: #f5f5f5;
   --cor-cinza-muito-claro: #f9f9f9;
-  --cor-navbar: #1e1e1e; /* Nova cor para navbar */
-
-  /* Alertas */
+  --cor-navbar: #1e1e1e;
   --cor-vermelho: #ff3b30;
   --cor-amarelo: #ffcc00;
 }
 
-.adicionarProdutos {
-  background: var(--cor-branco);
-  border: 1.5px solid var(--cor-roxo);
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  padding: 32px 24px;
-  max-width: 400px;
-  margin: 40px auto 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}  
-
-.adicionarProdutos h1 {
-  color: var(--cor-roxo);
-  margin-bottom: 24px;
-  font-size: 1.5rem;
-}  
-
-.adicionarProdutos form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-}  
-
-/* Inputs e textarea */
-.adicionarProdutos .input,
-.adicionarProdutos .textarea,
-.adicionarProdutos textarea {
-  width: 100%;
-  min-height: 44px;
-  border-radius: 8px;
-  border: 2px solid var(--cor-roxo);
-  padding: 8px 12px;
-  font-size: 1rem;
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  margin-bottom: 2px;
-  transition: border-color 0.2s;
-  resize: vertical;
-}  
-.adicionarProdutos .input:focus,
-.adicionarProdutos .textarea:focus,
-.adicionarProdutos textarea:focus {
-  border-color: var(--cor-laranja);
-  outline: none;
-}  
-.adicionarProdutos .input:invalid,
-.adicionarProdutos .textarea:invalid,
-.adicionarProdutos textarea:invalid {
-  border-color: var(--cor-vermelho);
-}  
+  font-family: "Poppins", Arial, sans-serif;
+}
 
-/* Botão */
-.adicionarProdutos .BTN {
-  width: 100%;
-  height: 48px;
-  border-radius: 8px;
-  background-color: var(--cor-laranja);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: bold;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-top: 8px;
-}  
-.adicionarProdutos .BTN:hover {
-  background-color: var(--cor-roxo);
-}  
-
-/* Responsividade */
-@media (max-width: 600px) {
-  .adicionarProdutos {
-    max-width: 98vw;
-    padding: 16px 4vw;
-  }  
-}  
-
-/* Body */
 body {
   background-color: var(--cor-branco);
   color: var(--cor-cinza-escuro);
-  font-family: Arial, sans-serif;
-  margin: 0; /* corrigido: tirar margem padrão */
+  min-height: 100vh;
 }
 
 /* Barra de navegação */
@@ -115,57 +38,183 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-/* Logo */
 .logo {
   color: var(--cor-branco);
   text-decoration: none;
-  font-size: 24px;
-  font-weight: bold;
-  transition: 0.3s ease;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: 0.3s;
 }
 
 .logo:hover {
   color: var(--cor-roxo);
 }
 
-/* Links */
 ul.navbar-links {
   list-style: none;
   display: flex;
-  gap: 20px;
-  margin: 0;   
-  padding: 0;  
+  gap: 25px;
 }
 
 ul.navbar-links li a {
   color: white;
   text-decoration: none;
-  padding: 10px 15px;
-  transition: 0.3s ease;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: 0.3s;
 }
 
 ul.navbar-links li a:hover {
-  cursor: pointer;
-  color: var(--cor-laranja);
+  background-color: var(--cor-roxo);
+  color: #fff;
 }
 
-.alerta {
-  display: flex;                
-  justify-content: center;
+/* Container principal */
+.adicionarProdutos {
+  background: var(--cor-cinza-muito-claro);
+  border-radius: 14px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+  padding: 40px 30px;
+  max-width: 450px;
+  margin: 60px auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 12px 24px;
-  width: fit-content;           
-  max-width: 90%;              
-  margin: 15px auto;           
-  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.adicionarProdutos:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.adicionarProdutos h1 {
+  color: var(--cor-roxo);
+  font-size: 1.8rem;
+  margin-bottom: 30px;
   text-align: center;
+}
+
+/* Inputs */
+.adicionarProdutos .input,
+.adicionarProdutos .textarea {
+  width: 100%;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  margin-bottom: 14px;
+  background-color: var(--cor-cinza-claro);
+  transition: all 0.2s ease;
+}
+
+.adicionarProdutos .input:focus,
+.adicionarProdutos .textarea:focus {
+  border-color: var(--cor-roxo);
+  background-color: #fff;
+  outline: none;
+}
+
+/* Input file */
+.adicionarProdutos input[type="file"].input {
+  padding: 10px;
+  border: 2px dashed var(--cor-roxo);
+  background-color: #fff;
   color: var(--cor-cinza-escuro);
-  background-color: var(--cor-roxo);
-  font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  position: relative;
-  transition: opacity 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.adicionarProdutos input[type="file"].input:hover {
+  background-color: var(--cor-cinza-muito-claro);
+  border-color: var(--cor-laranja);
+}
+
+/* Botão */
+.adicionarProdutos .BTN {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.adicionarProdutos .BTN:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Alerta */
+.alerta {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--cor-vermelho);
+  color: white;
+  padding: 16px 22px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  min-width: 260px;
+  max-width: 90vw;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 2000;
+  font-weight: 500;
+}
+
+.alerta.mostrar {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: auto;
+}
+
+.alerta .fechar {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  ul.navbar-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .adicionarProdutos {
+    margin: 30px 10px;
+    padding: 25px 18px;
+  }
+
+  .adicionarProdutos h1 {
+    font-size: 1.5rem;
+  }
 }

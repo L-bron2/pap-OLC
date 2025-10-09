@@ -1,3 +1,22 @@
+// FUNÇÃO PARA MOSTRAR ALERTAS
+function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
+    const alerta = document.getElementById('alerta');
+    alerta.innerHTML = `
+        <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
+        ${mensagem}
+        <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
+    `;
+    alerta.style.background = cor;
+    alerta.classList.add('mostrar');
+    alerta.style.display = 'block';
+
+    setTimeout(() => {
+        alerta.classList.remove('mostrar');
+        alerta.style.display = 'none';
+    }, 3000);
+}
+
+
 document.getElementById("formLogin").addEventListener("submit", async function (e) {
     e.preventDefault();
     const email = document.getElementById("email").value;
@@ -16,17 +35,18 @@ document.getElementById("formLogin").addEventListener("submit", async function (
         try {
             result = await response.json();
         } catch (jsonError) {
-            alert("Erro do servidor.");
+            mostrarAlerta("Erro do servidor.");
             return;
         }
 
         if (response.ok) {
             localStorage.setItem('token', result.token);
             window.location.href = "../inicio/inicio.html";
+            localStorage.setItem('token', data.token);
         } else {
-            alert(result.err || result.erro || "Email ou palavra passe errada");
+            mostrarAlerta(result.err || result.erro || "Email ou palavra passe errada");
         }
     } catch (error) {
-        alert("Erro de conexão com o servidor: " + error.message);
+        mostrarAlerta("Erro de conexão com o servidor: " + error.message);
     }
 });

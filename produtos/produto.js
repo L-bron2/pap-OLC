@@ -1,80 +1,118 @@
-// Função para mostrar alertas
-    function mostrarAlerta(mensagem, cor = '#ff3b30') {
-    const alerta = document.getElementById('alerta');
-    alerta.textContent = mensagem;
-    alerta.style.background = cor;
-    alerta.style.display = 'block';
-    setTimeout(() => {
-        alerta.style.display = 'none';
-    }, 3000); // timer de 3s para desaparecer 
-}
+const token = localStorage.getItem('token');
 
+// FUNÇÃO PARA MOSTRAR ALERTAS
+function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
+    const alerta = document.getElementById('alerta');
+    alerta.innerHTML = `
+        <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
+        ${mensagem}
+        <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
+    `;
+    alerta.style.background = cor;
+    alerta.classList.add('mostrar');
+    alerta.style.display = 'block';
+
+    setTimeout(() => {
+        alerta.classList.remove('mostrar');
+        alerta.style.display = 'none';
+    }, 3000);
+}
 
 document.getElementById("formProduto").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const titulo = document.getElementById("titulo").value;     
-    const descricao = document.getElementById("descricao").value;
+
+    // PEGA OS DADOS DO FORMDATA
+    const titulo = document.getElementById("titulo").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
     const preco = parseFloat(document.getElementById("preco").value);
-    const categoria = document.getElementById("categoria").value;
-    const imagem_url = document.getElementById("imagem_url").value;
+    const categoria = document.getElementById("categoria").value.trim();
+    const imagemInput = document.getElementById("imagem");
+    const imagem = imagemInput.files[0];
 
-    //verifiações (campos, preço, etc..)
-    const campos =  this.querySelectorAll("input, textarea");
-    let tudoPrenchido = true;
-                
-    campos.forEach(campo => {
-    if (campo.value.trim() === "") {
-        tudoPrenchido = false;
-        campo.style.borderColor = "red";
-    } else {
-        campo.style.borderColor = "";
-    }});
-
-    if (!tudoPrenchido) {
-        mostrarAlerta("Por favor, preencha todos os campos.");
+    // VALIDAR SE O TOKEN EXIST 
+    if (!token) {
+        mostrarAlerta("Precisa fazer logi para vender!.", "#ff3b30");
         return;
-    } 
+    }
+
+    // VALIDAR CAMPOS MENOS A IMAGEM 
+    const campos = Array.from(this.querySelectorAll("input:not([type=file]), textarea"));
+    let tudoPreenchido = true;
+
+    campos.forEach(campo => {
+        if (campo.value.trim() === "") {
+            tudoPreenchido = false;
+            campo.style.borderColor = "red";
+        } else {
+            campo.style.borderColor = "";
+        }
+    });
+
+    if (!tudoPreenchido) {
+        mostrarAlerta("Por favor, preencha todos os campos.", "#ff3b30");
+        return;
+    }
 
     if (isNaN(preco) || preco <= 0) {
-        mostrarAlerta("Digite um preço válido.");
+        mostrarAlerta("Digite um preço válido.", "#ff3b30");
         return;
     }
 
-    if (!/^https?:\/\/.+\..+/.test(imagem_url)) {
-        mostrarAlerta("Digite uma URL de imagem válida.");
+    // VALIDAR IMAGEM
+    if (!imagem) {
+        mostrarAlerta("Selecione uma imagem válida.", "#ff3b30");
+        imagemInput.style.borderColor = "red";
         return;
+    } else if (!imagem.type.startsWith("image/")) {
+        mostrarAlerta("O arquivo selecionado não é uma imagem.", "#ff3b30");
+        imagemInput.style.borderColor = "red";
+        return;
+    } else {
+        imagemInput.style.borderColor = "";
     }
 
-    try {  
+    const formData = new FormData();
+    formData.append("titulo", titulo);
+    formData.append("descricao", descricao);
+    formData.append("preco", preco);
+    formData.append("categoria", categoria);
+    formData.append("imagem", imagem);
+
+    try {
+        // ENVIAR DADOS PARA O BACKEND
         const response = await fetch("http://localhost:3000/produtos", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-            }, 
-            body: JSON.stringify({ titulo, descricao, preco, categoria, imagem_url }),
+                "Authorization": `Bearer ${token}` 
+            },
+            body: formData,
         });
 
-        //verificar resposta do servidor        
         let result = {};
         try {
             result = await response.json();
         } catch (jsonError) {
-            mostrarAlerta("Erro do servidor.");
+            mostrarAlerta("Erro ao processar resposta do servidor.", "#ff3b30");
             return;
         }
 
         if (response.ok) {
-            mostrarAlerta(result.msg || "Produto criado com sucesso!", '#4BB543');
-            window.location.href = "../inicio/inicio.html";
-        }
-        else {
-            mostrarAlerta(result.err || result.erro || "Erro ao criar produto.");
+            mostrarAlerta(result.msg || "Produto criado com sucesso!", '#4BB543', '✅');
+            this.reset();
+
+            // LIMPAR BORDAS VERMELHAS
+            campos.forEach(campo => campo.style.borderColor = "");
+            imagemInput.style.borderColor = "";
+
+            // REDIRECIONA SE O PRODUTO FOR CRIADO
+            setTimeout(() => {
+                window.location.href = "../inicio/inicio.html";
+            }, 3000);
+        } else {
+            mostrarAlerta(result.erro || result.err || result.message || "Erro ao criar produto.", "#ff3b30");
         }
 
-        this.reset(); // Limpar o formulário
-        campos.forEach(campo => campo.style.borderColor = ""); // Remove a borda vermelha
-    }catch (error) {
-        mostrarAlerta("Erro de conexão com o servidor: " + error.message);
+    } catch (error) {
+        mostrarAlerta("Erro de conexão com o servidor: " + error.message, "#ff3b30");
     }
-
 });
