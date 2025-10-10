@@ -1,4 +1,4 @@
-// 🔔 FUNÇÃO PARA MOSTRAR ALERTAS
+//FUNÇÃO PARA MOSTRAR ALERTAS
 function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
     const alerta = document.getElementById('alerta');
     alerta.innerHTML = `
@@ -16,61 +16,75 @@ function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
     }, 3000);
 }
 
-document.getElementById("formRecuperar").addEventListener("submit", async function (e) {
+document.getElementById("BTN_verificar").addEventListener("submit", async function (e) { 
     e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const nome = document.getElementById("nome").value.trim();
 
-    const email = document.getElementById("email");
-    const nomeUtilizador = document.getElementById("nomeUtilizador");
-    const palavraPasse = document.getElementById("palavra-passe");
-
-    // VERIFICAR SE TODOS OS CAMPOS ESTÃO PREENCHIDOS
-    const campos = this.querySelectorAll("input");
-    let tudoPreenchido = true;
-
-    campos.forEach(campo => {
-        if (campo.value.trim() === "") {
-            tudoPreenchido = false;
-            campo.style.borderColor = "red";
-        } else {
-            campo.style.borderColor = "";
-        }
-    });
-
-    if (!tudoPreenchido) {
-        mostrarAlerta("Por favor, preencha todos os campos.", "#ff3b30");
+    if(!email || !nome) {
+        mostrarAlerta("Por favor, preencha todos os campos.", '#ff3b30');
         return;
     }
 
-    // PEGAR DADOS DO FORMULÁRIO
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
+    try {  
         const response = await fetch("http://localhost:3000/usuarios", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
-        });
+            body: JSON.stringify({ email, nome })
+    });  
+    
+    const result = await response.json();
 
-        let result = {};
-        try {
-            result = await response.json();
-        } catch (jsonError) {
-            mostrarAlerta("Erro ao processar resposta do servidor.", "#ff3b30");
-            return;
-        }
-
-        if (response.ok) {
-            mostrarAlerta("Palavra-passe alterada com sucesso!", "#4BB543", "&#10004;");
-            campos.forEach(campo => campo.value = "");
-        } else {
-            mostrarAlerta(result.message || result.err || "Erro ao alterar palavra-passe.", "#ff3b30");
-        }
-
+    if (response.ok) {
+        mostrarAlerta("Verificação bem-sucedida! Por favor, insira a nova palavra passe.", '#4BB543');
+        document.getElementById("campoSenha").style.display = "block";
+        document.getElementById("BTN_verificar").style.display = "none";
+    } else {
+        mostrarAlerta(result.err || result.erro || "Utilizador não encontrado.");
+    }
     } catch (error) {
-        console.error("Erro de rede:", error);
-        mostrarAlerta("Erro ao comunicar com o servidor.", "#ff3b30");
+        mostrarAlerta("Erro de conexão com o servidor: " + error.message);
+    }
+});
+
+
+document.getElementById("Alterar").addEventListener("submit", async function (e) { 
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const novaSenha = document.getElementById("novaSenha").value.trim();
+
+    if(!email || !nome || !novaSenha) {
+        mostrarAlerta("Por favor, preencha todos os campos.", '#ff3b30');
+        return;
+    }
+
+    try {  
+        const response = await fetch("http://localhost:3000/recuperar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, nome, novaSenha })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        mostrarAlerta("Palavra passe alterada com sucesso!", '#4BB543');
+        document.getElementById("formRecuperar").reset();
+        document.getElementById("campoSenha").style.display = "block";
+        document.getElementById("btnVerificar").style.display = "none";
+        
+        setTimeout(() => {
+            window.location.href = "../Login/login.html";
+        }, 2000);
+    } else {
+        mostrarAlerta(result.err || result.erro || "Erro ao alterar a palavra passe.");
+    } 
+    } catch (error) {   
+        mostrarAlerta("Erro de conexão com o servidor: " + error.message);  
     }
 });

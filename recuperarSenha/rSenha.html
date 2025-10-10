@@ -13,11 +13,16 @@
             <div class="recuperarSenhaBox">
                 <form id="recuperarSenhaBox">
                     <input type="text" class="input" id="email" placeholder="Insira o seu email" required>
-                    <input type="text" class="input" id="nomeUtilizador" placeholder="Nome de utilizador" required>
-                    <input type="text" class="input" id="novaSenha" placeholder="Nova palavra passe" required>
+                    <input type="text" class="input" id="nome" placeholder="Nome de utilizador" required>
+
+                    <div class="campoSenha" id="campoSenha" style="display: none;">
+                        <input type="password" class="input" id="novaSenha" placeholder="Nova palavra passe" required>
+                        <button type="submit" id="Alterar">Alterar</button>
+                    </div>
+                    <button type="submit" class="BTN" id="BTN_verificar">Verificar</button>
                 </form>
-                <button type="submit" class="BTN">Recuperar palavra passe</button>
             </div>
+            <button class="BTN"><a href="../Login/login.html">Voltar/Faça login</a></button>
         </div>
 
         <div class="alerta" style="display: none;"></div>
