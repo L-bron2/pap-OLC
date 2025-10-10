@@ -1,8 +1,3 @@
-/* ===========================
-   produto.css (versão melhorada)
-   =========================== */
-
-/* Paleta de cores */
 :root {
   --cor-laranja: #ff6600;
   --cor-verde: #00cc66;
@@ -12,7 +7,15 @@
   --cor-cinza-claro: #eeeeee;
   --cor-branco: #f5f5f5;
   --cor-cinza-muito-claro: #f9f9f9;
-  --cor-navbar: #1e1e1e;
+  --cor-navbar-gradiente: linear-gradient(
+    135deg,
+    #2a0035,
+    #3b003d,
+    #4e0063,
+    #5c0a00
+  );
+  --cor-navbar-link: #ffffff;
+  --cor-navbar-hover: #ff6600;
   --cor-vermelho: #ff3b30;
   --cor-amarelo: #ffcc00;
 }
@@ -31,53 +34,79 @@ body {
   min-height: 100vh;
 }
 
-/* Barra de navegação */
+/* Navbar */
 nav {
-  background-color: var(--cor-navbar);
-  padding: 1rem 2rem;
+  position: fixed;
+  left: 0px;
   display: flex;
+  background: var(--cor-navbar-gradiente);
+  padding: 1rem 2rem;
+  width: 100%;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-  position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+/* Logo */
 .logo {
-  color: var(--cor-branco);
+  color: var(--cor-navbar-link);
   text-decoration: none;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  transition: 0.3s;
+  font-size: 24px;
+  font-weight: bold;
+  transition: 0.3s ease;
 }
 
 .logo:hover {
-  color: var(--cor-roxo);
+  color: var(--cor-laranja);
+  transform: scale(1.05);
 }
 
+/* Links */
 ul.navbar-links {
   list-style: none;
   display: flex;
-  gap: 25px;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
 }
 
 ul.navbar-links li a {
-  color: white;
+  color: var(--cor-navbar-link);
   text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: 0.3s;
+  padding: 10px 15px;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+ul.navbar-links li a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--cor-navbar-hover);
+  box-shadow: 0 0 6px rgba(255, 102, 0, 0.5);
+  transition: width 0.3s ease;
 }
 
 ul.navbar-links li a:hover {
-  background-color: var(--cor-roxo);
-  color: #fff;
+  color: var(--cor-navbar-hover);
 }
 
-/* Container principal */
+ul.navbar-links li a:hover::after {
+  width: 100%;
+}
+
+h1 {
+  color: var(--cor-cinza-escuro);
+  margin-bottom: 20px;
+}
+
+
+/* Container */
 .adicionarProdutos {
   background: var(--cor-cinza-muito-claro);
   border-radius: 14px;
@@ -85,6 +114,7 @@ ul.navbar-links li a:hover {
   padding: 40px 30px;
   max-width: 450px;
   margin: 60px auto;
+  margin-top: 120px ;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -157,6 +187,32 @@ ul.navbar-links li a:hover {
   transform: scale(1.03);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
+
+/* Botão voltar*/
+.BTN_voltar {
+  position: fixed;
+  top: 100px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--cor-laranja);
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.BTN_voltar:hover {
+  background: var(--cor-roxo);
+  transform: scale(1.1);
+}
+
 
 /* Alerta */
 .alerta {

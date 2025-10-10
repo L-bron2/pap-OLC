@@ -14,8 +14,7 @@ window.onload = async function() {
                 <p>${produto.descricao}</p>
                 <p>Preço: R$ ${produto.preco}</p>
                 <p>Categoria: ${produto.categoria}</p>
-                <p>Data de publicação: ${new Date(produto.data_publicacao).toLocaleString()}</p>
-                <p>Vendedor (ID): ${produto.usuario_id}</p>
+                <p>Data: ${new Date(produto.data_publicacao).toLocaleDateString()}</p>
             `;
             div.appendChild(item);
         });

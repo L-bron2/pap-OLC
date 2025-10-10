@@ -5,14 +5,18 @@
   --cor-roxo: #8c4cff;
 
   /* Cores secundárias */
-  --cor-cinza-escuro: #333333; /* cor texto */
+  --cor-cinza-escuro: #333333;
   --cor-cinza-medio: #666666;
   --cor-cinza-claro: #eeeeee;
 
   /* Cores de fundo */
   --cor-branco: #f5f5f5;
   --cor-cinza-muito-claro: #f9f9f9;
-  --cor-navbar: #1e1e1e; /* Nova cor para navbar */
+
+  /* Navbar */
+  --cor-navbar-gradiente: linear-gradient(135deg, #2a0035, #3b0042, #4e0063, #5c0a00);
+  --cor-navbar-link: #ffffff;
+  --cor-navbar-hover: #ff6600;
 
   /* Alertas */
   --cor-vermelho: #ff3b30;
@@ -24,21 +28,25 @@ body {
   background-color: var(--cor-branco);
   color: var(--cor-cinza-escuro);
   font-family: Arial, sans-serif;
-  margin: 0; /* corrigido: tirar margem padrão */
+  margin: 0;
 }
 
-/* Barra de navegação */
+/* Navbar */
 nav {
-  background-color: var(--cor-navbar);
+  background: var(--cor-navbar-gradiente);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 /* Logo */
 .logo {
-  color: var(--cor-branco);
+  color: var(--cor-navbar-link);
   text-decoration: none;
   font-size: 24px;
   font-weight: bold;
@@ -46,7 +54,8 @@ nav {
 }
 
 .logo:hover {
-  color: var(--cor-roxo);
+  color: var(--cor-laranja);
+  transform: scale(1.05);
 }
 
 /* Links */
@@ -54,20 +63,35 @@ ul.navbar-links {
   list-style: none;
   display: flex;
   gap: 20px;
-  margin: 0;   /* corrigido */
-  padding: 0;  /* corrigido */
+  margin: 0;
+  padding: 0;
 }
 
 ul.navbar-links li a {
-  color: white;
+  color: var(--cor-navbar-link);
   text-decoration: none;
   padding: 10px 15px;
-  transition: 0.3s ease;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+ul.navbar-links li a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--cor-navbar-hover);
+  transition: width 0.3s ease;
 }
 
 ul.navbar-links li a:hover {
-  cursor: pointer;
-  color: var(--cor-laranja);
+  color: var(--cor-navbar-hover);
+}
+
+ul.navbar-links li a:hover::after {
+  width: 100%;
 }
 
 /* Título */
@@ -88,16 +112,16 @@ h1 {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   max-width: 400px;
   width: 90%;
-  margin: 40px auto; /* corrigido: centraliza horizontalmente */
+  margin: 40px auto;
 }
 
 form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
 }
 
 /* Inputs */
@@ -116,7 +140,7 @@ form {
   width: 200px;
   height: 50px;
   border-radius: 10px;
-  background-color: var(--cor-laranja);
+  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
   color: white;
   border: none;
   cursor: pointer;
@@ -126,6 +150,5 @@ form {
 }
 
 .BTN:hover {
-  background-color: var(--cor-roxo);
+  transform: scale(1.05);
 }
-    

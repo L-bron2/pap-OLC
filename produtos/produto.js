@@ -15,7 +15,7 @@ function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
     setTimeout(() => {
         alerta.classList.remove('mostrar');
         alerta.style.display = 'none';
-    }, 3000);
+    }, 30000);
 }
 
 document.getElementById("formProduto").addEventListener("submit", async function (e) {

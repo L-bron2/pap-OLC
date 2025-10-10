@@ -1,4 +1,4 @@
-// IMPORTS 
+// IMPORTS
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
@@ -15,15 +15,13 @@ if (!fs.existsSync('uploads')) {
 
 // CONFIGURAR MULTER
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // INICIALIZAR EXPRESS E MIDDLEWARES
 const app = express();
@@ -42,35 +40,25 @@ const db = mysql.createConnection({
 // FUNÇÃO AUTENTICAR
 function autenticar(req, res, next) {
   let token = req.headers["authorization"];
-  if (!token) {
-    return res.status(403).json({ erro: "Token não fornecido" });
-  }
-
-  // Aceita tanto "Bearer <token>" quanto só "<token>"
-  if (token.startsWith("Bearer ")) {
-    token = token.slice(7); // remove "Bearer "
-  }
-
+  if (!token) return res.status(403).json({ erro: "Token não fornecido" });
+  if (token.startsWith("Bearer ")) token = token.slice(7);
   jwt.verify(token, "segredo", (err, decoded) => {
-    if (err) {
-      console.error("Erro ao verificar token:", err.message);
-      return res.status(401).json({ erro: "Token inválido" });
-    }
+    if (err) return res.status(401).json({ erro: "Token inválido" });
     req.userId = decoded.id;
     next();
   });
 }
 
+// ---------------------- ROTAS ---------------------- //
 
-// ROTAS
-// CRIAR UTILIZADORES
+// CRIAR UTILIZADOR
 app.post("/usuarios", async (req, res) => {
   const { nome, email, senha } = req.body;
   const hash = await bcrypt.hash(senha, 10);
   db.query("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
     [nome, email, hash],
     (err) => {
-      if (err) return res.status(500).json({err: `Erro ao criar a conta: ${err.message}`});
+      if (err) return res.status(500).json({ erro: `Erro ao criar conta: ${err.message}` });
       res.json({ msg: "Conta criada com sucesso!" });
     });
 });
@@ -88,44 +76,60 @@ app.post("/login", (req, res) => {
   });
 });
 
-// RECUPERAR PALAVRA PASSE
-app.post("/recuperar", async (req, res) => {
+//VERIFICAR UTILIZADOR
+app.post("/recuperar/verificar", async (req, res) => {
+  const { email, nome } = req.body;
+
+  if (!email || !nome) {
+    return res.status(400).json({ erro: "Preencha email e nome." });
+  }
+
+  try {
+    const [rows] = await db.promise().query(
+      "SELECT * FROM usuarios WHERE email = ? AND nome = ?",
+      [email, nome]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ erro: "Utilizador não encontrado." });
+    }
+
+    res.json({ msg: "Utilizador verificado com sucesso." });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro ao verificar utilizador." });
+  }
+});
+
+// ✅ ETAPA 2 - ALTERAR SENHA
+app.post("/recuperar/alterar", async (req, res) => {
   const { email, nome, novaSenha } = req.body;
 
   if (!email || !nome || !novaSenha) {
-    return res.status(400).json({ message: "Preencha todos os campos." });
+    return res.status(400).json({ erro: "Preencha todos os campos." });
   }
 
-  // VERIFICA SE O UTILIZADOR EXISTE
-  const [rows] = await db.promise().query(
-    "SELECT * FROM usuarios WHERE email = ? AND nome = ?",
-    [email, nome]
-  );
+  try {
+    const hashed = await bcrypt.hash(novaSenha, 10);
+    const [result] = await db.promise().query(
+      "UPDATE usuarios SET senha = ? WHERE email = ? AND nome = ?",
+      [hashed, email, nome]
+    );
 
-  if (rows.length === 0) {
-    return res.status(404).json({ message: "Conta não encontrado." });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ erro: "Utilizador não encontrado." });
+    }
+
+    res.json({ msg: "Palavra passe alterada com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro ao atualizar palavra passe." });
   }
+});
 
-  // ENCIRPTA A NOVA PALAVRA PASSE
-  const hashed = await bcrypt.hash(novaSenha, 10);
+//PRODUTOS
 
-  // ATUALIZA NA BASE DE DADOS
-  await db.promise().query(
-    "UPDATE usuarios SET senha = ? WHERE email = ? AND nome = ?",
-    [hashed, email, nome]
-  );
-
-  res.json({ message: "Palavra-passe alterada com sucesso!" });
-})
-
-// CRIAR PRODUTOS
 app.post("/produtos", autenticar, upload.single('imagem'), (req, res) => {
   const { titulo, descricao, preco, categoria } = req.body;
-  let imagem_url = null;
-
-  if (req.file) {
-    imagem_url = `/uploads/${req.file.filename}`;
-  }
+  const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   const sql = `
     INSERT INTO produtos (usuario_id, titulo, descricao, preco, categoria, imagem_url)
@@ -133,55 +137,23 @@ app.post("/produtos", autenticar, upload.single('imagem'), (req, res) => {
   `;
 
   db.query(sql, [req.userId, titulo, descricao, preco, categoria, imagem_url], (err, result) => {
-    if (err) {
-      console.error("Erro ao inserir produto:", err);
-      return res.status(500).json({ erro: "Erro ao criar produto" });
-    }
+    if (err) return res.status(500).json({ erro: "Erro ao criar produto." });
     res.status(201).json({ msg: "Produto criado com sucesso!", id: result.insertId });
   });
 });
 
-
 // LISTAR PRODUTOS
 app.get("/produtos", (req, res) => {
   const sql = `
-    SELECT 
-      p.*, 
-      u.nome AS usuario_nome 
+    SELECT p.*, u.nome AS usuario_nome 
     FROM produtos p
     JOIN usuarios u ON p.usuario_id = u.id
     ORDER BY p.data_publicacao DESC
   `;
-
   db.query(sql, (err, results) => {
-    if (err) {
-      console.error("Erro ao listar produtos:", err);
-      return res.status(500).json({ erro: "Erro ao listar produtos." });
-    }
+    if (err) return res.status(500).json({ erro: "Erro ao listar produtos." });
     res.json(results);
   });
-});
-
-
-// ENVIAR MENSAGENS
-app.post("/mensagens", autenticar, (req, res) => {
-  const { destinatario_id, produto_id, mensagem } = req.body;
-  db.query("INSERT INTO mensagens (remetente_id, destinatario_id, produto_id, mensagem) VALUES (?, ?, ?, ?)",
-    [req.userId, destinatario_id, produto_id, mensagem],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.json({ msg: "Mensagem enviada!" });
-    });
-});
-
-// INBOX
-app.get("/mensagens", autenticar, (req, res) => {
-  db.query("SELECT * FROM mensagens WHERE remetente_id = ? OR destinatario_id = ? ORDER BY data_envio DESC",
-    [req.userId, req.userId],
-    (err, results) => {
-      if (err) return res.status(500).json(err);
-      res.json(results);
-    });
 });
 
 // INICIAR SERVIDOR

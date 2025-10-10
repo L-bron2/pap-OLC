@@ -1,33 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Palavra passe</title>
-    <link rel="stylesheet" href="rSenha.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Palavra Passe</title>
+  <link rel="stylesheet" href="rSenha.css">
 </head>
 <body>
-    <div class="container">
-        <div class="main">
-            <h1>Recuperar palavra-passe</h1>
-            <div class="recuperarSenhaBox">
-                <form id="recuperarSenhaBox">
-                    <input type="text" class="input" id="email" placeholder="Insira o seu email" required>
-                    <input type="text" class="input" id="nome" placeholder="Nome de utilizador" required>
+  <div class="container">
+    <div class="main">
+      <h1>Recuperar palavra-passe</h1>
 
-                    <div class="campoSenha" id="campoSenha" style="display: none;">
-                        <input type="password" class="input" id="novaSenha" placeholder="Nova palavra passe" required>
-                        <button type="submit" id="Alterar">Alterar</button>
-                    </div>
-                    <button type="submit" class="BTN" id="BTN_verificar">Verificar</button>
-                </form>
-            </div>
-            <button class="BTN"><a href="../Login/login.html">Voltar/Faça login</a></button>
-        </div>
+      <div class="recuperarSenhaBox">
+        <form id="recuperarSenhaBox">
+          <input type="text" class="input" id="email" placeholder="Insira o seu email" required>
+          <input type="text" class="input" id="nome" placeholder="Nome de utilizador" required>
 
-        <div class="alerta" style="display: none;"></div>
+          <div class="campoSenha" id="campoSenha" style="display: none;">
+            <input type="password" class="input" id="novaSenha" placeholder="Nova palavra passe" required>
+            <button type="button" id="Alterar" class="BTN">Alterar</button>
+          </div>
+
+          <button type="button" class="BTN" id="BTN_verificar">Verificar</button>
+        </form>
+      </div>
+
     </div>
+    <a href="../Login/login.html" class="BTN_voltar">
+      &#8592;
+    </a>
 
-    <script src="rsenha.js"></script>
+    <div id="alerta" class="alerta" style="display: none;"></div>
+  </div>
+
+  <script src="rsenha.js"></script>
 </body>
 </html>
