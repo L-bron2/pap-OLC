@@ -107,26 +107,32 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 40px;
+  padding: 40px 1px;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 90%;
+  max-width: 500px;
+  width: 70%;
   margin: 40px auto;
+  margin-top: 100px;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-form {
+.login_box form {
   display: flex;
   flex-direction: column;
   width: 100%;
-  justify-content: center;
   align-items: center;
   gap: 15px;
 }
 
+.login_box:hover {
+  transform:  translate(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
 /* Inputs */
 .input {
-  width: 100%;
+  width: 70%;
   height: 50px;
   border-radius: 10px;
   border: 2px solid var(--cor-roxo);
@@ -151,4 +157,85 @@ form {
 
 .BTN:hover {
   transform: scale(1.05);
+}
+
+/* Botão voltar*/
+.BTN_voltar {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--cor-laranja);
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.BTN_voltar:hover {
+  background: var(--cor-roxo);
+  transform: scale(1.1);
+}
+
+
+/* Alerta */
+.alerta {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--cor-vermelho);
+  color: white;
+  padding: 16px 22px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  min-width: 260px;
+  max-width: 90vw;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 2000;
+  font-weight: 500;
+}
+
+.alerta.mostrar {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: auto;
+}
+
+.alerta .fechar {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+
+/* Responsividade */
+@media (max-width: 500px) {
+  .login_box {
+    padding: 25px 20px;
+    max-width: 95vw;
+  }
+
+  .BTN {
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
 }
