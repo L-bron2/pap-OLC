@@ -9,32 +9,49 @@ const multer = require("multer");
 const fs = require("fs");
 
 // CRIAR PASTA UPLOADS SE NÃO EXISTIR
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
 }
 
-// CONFIGURAR MULTER
+if (!fs.existsSync("FTperfil")) {
+  fs.mkdirSync("FTperfil");
+}
+
+// MULTER(para upload de imagens dos perfis)
+const imgStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "FTperfil/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const carregr = multer({ imgStorage });
+
+// MULTER(para upload de imagens dos produtos)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 const upload = multer({ storage });
 
-// INICIALIZAR EXPRESS E MIDDLEWARES
+// INICIALIZAR EXPRESS
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/FTperfil", express.static(path.join(__dirname, "FTperfil")));
 
 // CONEXÃO MYSQL
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "Erlander",
-  database: "OLC"
+  database: "OLC",
 });
 
 // FUNÇÃO AUTENTICAR
@@ -55,25 +72,29 @@ function autenticar(req, res, next) {
 app.post("/usuarios", async (req, res) => {
   const { nome, email, senha } = req.body;
   const hash = await bcrypt.hash(senha, 10);
-  db.query("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
+  db.query(
+    "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
     [nome, email, hash],
     (err) => {
-      if (err) return res.status(500).json({ erro: `Erro ao criar conta: ${err.message}` });
+      if (err)
+        return res
+          .status(500)
+          .json({ erro: `Erro ao criar conta: ${err.message}` });
       res.json({ msg: "Conta criada com sucesso!" });
-    });
+    }
+  );
 });
 
-// LOGIN
-app.post("/login", (req, res) => {
-  const { email, senha } = req.body;
-  db.query("SELECT * FROM usuarios WHERE email = ?", [email], async (err, results) => {
-    if (err || results.length === 0) return res.status(401).json({ erro: "Usuário não encontrado" });
-    const user = results[0];
-    const match = await bcrypt.compare(senha, user.senha);
-    if (!match) return res.status(401).json({ erro: "Palavra passe incorreta" });
-    const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
-    res.json({ token });
-  });
+
+// Obter lista de utilizadores (protegida)
+app.get("/usuarios", autenticar, (req, res) => {
+  db.query(
+    "SELECT nome, email, foto_url, data_publicacao AS data_publicacao FROM usuarios",
+    (err, results) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json(results);
+    }
+  );
 });
 
 //VERIFICAR UTILIZADOR
@@ -85,10 +106,12 @@ app.post("/recuperar/verificar", async (req, res) => {
   }
 
   try {
-    const [rows] = await db.promise().query(
-      "SELECT * FROM usuarios WHERE email = ? AND nome = ?",
-      [email, nome]
-    );
+    const [rows] = await db
+      .promise()
+      .query("SELECT * FROM usuarios WHERE email = ? AND nome = ?", [
+        email,
+        nome,
+      ]);
 
     if (rows.length === 0) {
       return res.status(404).json({ erro: "Utilizador não encontrado." });
@@ -110,10 +133,13 @@ app.post("/recuperar/alterar", async (req, res) => {
 
   try {
     const hashed = await bcrypt.hash(novaSenha, 10);
-    const [result] = await db.promise().query(
-      "UPDATE usuarios SET senha = ? WHERE email = ? AND nome = ?",
-      [hashed, email, nome]
-    );
+    const [result] = await db
+      .promise()
+      .query("UPDATE usuarios SET senha = ? WHERE email = ? AND nome = ?", [
+        hashed,
+        email,
+        nome,
+      ]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ erro: "Utilizador não encontrado." });
@@ -127,7 +153,7 @@ app.post("/recuperar/alterar", async (req, res) => {
 
 //PRODUTOS
 
-app.post("/produtos", autenticar, upload.single('imagem'), (req, res) => {
+app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   const { titulo, descricao, preco, categoria } = req.body;
   const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -136,10 +162,16 @@ app.post("/produtos", autenticar, upload.single('imagem'), (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [req.userId, titulo, descricao, preco, categoria, imagem_url], (err, result) => {
-    if (err) return res.status(500).json({ erro: "Erro ao criar produto." });
-    res.status(201).json({ msg: "Produto criado com sucesso!", id: result.insertId });
-  });
+  db.query(
+    sql,
+    [req.userId, titulo, descricao, preco, categoria, imagem_url],
+    (err, result) => {
+      if (err) return res.status(500).json({ erro: "Erro ao criar produto." });
+      res
+        .status(201)
+        .json({ msg: "Produto criado com sucesso!", id: result.insertId });
+    }
+  );
 });
 
 // LISTAR PRODUTOS
@@ -157,4 +189,6 @@ app.get("/produtos", (req, res) => {
 });
 
 // INICIAR SERVIDOR
-app.listen(3000, () => console.log("Servidor rodando em http://localhost:3000"));
+app.listen(3000, () =>
+  console.log("Servidor rodando em http://localhost:3000")
+);

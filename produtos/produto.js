@@ -1,6 +1,6 @@
 const token = localStorage.getItem('token');
 
-// FUNÇÃO PARA MOSTRAR ALERTAS
+// função para mostrar alertas
 function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
     const alerta = document.getElementById('alerta');
     alerta.innerHTML = `
@@ -21,7 +21,7 @@ function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
 document.getElementById("formProduto").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // PEGA OS DADOS DO FORMDATA
+    // pega os dados do FORMDATA
     const titulo = document.getElementById("titulo").value.trim();
     const descricao = document.getElementById("descricao").value.trim();
     const preco = parseFloat(document.getElementById("preco").value);
@@ -29,13 +29,13 @@ document.getElementById("formProduto").addEventListener("submit", async function
     const imagemInput = document.getElementById("imagem");
     const imagem = imagemInput.files[0];
 
-    // VALIDAR SE O TOKEN EXIST 
+    // validar se o utilizador está logado
     if (!token) {
         mostrarAlerta("Precisa fazer logi para vender!.", "#ff3b30");
         return;
     }
 
-    // VALIDAR CAMPOS MENOS A IMAGEM 
+    // valida os campos menos o da imagem 
     const campos = Array.from(this.querySelectorAll("input:not([type=file]), textarea"));
     let tudoPreenchido = true;
 
@@ -58,7 +58,7 @@ document.getElementById("formProduto").addEventListener("submit", async function
         return;
     }
 
-    // VALIDAR IMAGEM
+    // valida a imagem 
     if (!imagem) {
         mostrarAlerta("Selecione uma imagem válida.", "#ff3b30");
         imagemInput.style.borderColor = "red";
@@ -79,7 +79,7 @@ document.getElementById("formProduto").addEventListener("submit", async function
     formData.append("imagem", imagem);
 
     try {
-        // ENVIAR DADOS PARA O BACKEND
+        // envia a requisição para o servidor
         const response = await fetch("http://localhost:3000/produtos", {
             method: "POST",
             headers: {
@@ -100,11 +100,11 @@ document.getElementById("formProduto").addEventListener("submit", async function
             mostrarAlerta(result.msg || "Produto criado com sucesso!", '#4BB543', '✅');
             this.reset();
 
-            // LIMPAR BORDAS VERMELHAS
+            // limpa as bordas vermelhas
             campos.forEach(campo => campo.style.borderColor = "");
             imagemInput.style.borderColor = "";
 
-            // REDIRECIONA SE O PRODUTO FOR CRIADO
+            // redireciona para a página inicia 
             setTimeout(() => {
                 window.location.href = "../inicio/inicio.html";
             }, 3000);
