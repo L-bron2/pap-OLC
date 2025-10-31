@@ -8,11 +8,17 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 
-// CRIAR PASTA UPLOADS SE NÃO EXISTIR
+// iniciar express  ← 🔹 MOVEU-SE PARA CIMA
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// pasta para uploads de imagens dos produtos
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
 }
 
+//pasta para uploads de fotos de perfil
 if (!fs.existsSync("FTperfil")) {
   fs.mkdirSync("FTperfil");
 }
@@ -27,7 +33,48 @@ const imgStorage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-const carregr = multer({ imgStorage });
+// configurar multer para perfis (usar a opção 'storage')
+const uploadProfile = multer({ storage: imgStorage });
+
+// conexão com o banco de dados 
+const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "Erlander",
+  database: "OLC",
+});
+
+// verificar conexão (ajuda a diagnosticar erros 500 quando o BD não está disponível)
+db.connect((err) => {
+  if (err) {
+    console.error('Erro ao conectar ao MySQL:', err.message);
+  } else {
+    console.log('Conectado ao MySQL (OLC)');
+  }
+});
+
+// LOGIN 
+app.post("/login", (req, res) => {
+  const { email, senha } = req.body;
+  if (!email || !senha)
+    return res
+      .status(400)
+      .json({ erro: "Email e senha são obrigatórios" });
+
+  db.query("SELECT * FROM usuarios WHERE email = ?", [email], async (err, results) => {
+    if (err) return res.status(500).json({ erro: err.message });
+    if (!results || results.length === 0)
+      return res.status(401).json({ erro: "Usuário não encontrado" });
+
+    const user = results[0];
+    const match = await bcrypt.compare(senha, user.senha);
+    if (!match)
+      return res.status(401).json({ erro: "Palavra passe incorreta" });
+
+    const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
+    res.json({ token });
+  });
+});
 
 // MULTER(para upload de imagens dos produtos)
 const storage = multer.diskStorage({
@@ -39,22 +86,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// INICIALIZAR EXPRESS
-const app = express();
-app.use(express.json());
-app.use(cors());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/FTperfil", express.static(path.join(__dirname, "FTperfil")));
 
-// CONEXÃO MYSQL
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Erlander",
-  database: "OLC",
-});
-
-// FUNÇÃO AUTENTICAR
+// funcão para autenticar token JWT
 function autenticar(req, res, next) {
   let token = req.headers["authorization"];
   if (!token) return res.status(403).json({ erro: "Token não fornecido" });
@@ -68,7 +103,7 @@ function autenticar(req, res, next) {
 
 // ---------------------- ROTAS ---------------------- //
 
-// CRIAR UTILIZADOR
+// criar conta
 app.post("/usuarios", async (req, res) => {
   const { nome, email, senha } = req.body;
   const hash = await bcrypt.hash(senha, 10);
@@ -85,19 +120,43 @@ app.post("/usuarios", async (req, res) => {
   );
 });
 
+// Obter o utilizador logado
+app.get("/usuarios/id", autenticar, (req, res) => {
+  const userId = req.userId;
+  const sql = `SELECT id, nome, email, foto_url FROM usuarios WHERE id = ?`;
 
-// Obter lista de utilizadores (protegida)
-app.get("/usuarios", autenticar, (req, res) => {
-  db.query(
-    "SELECT nome, email, foto_url, data_publicacao AS data_publicacao FROM usuarios",
-    (err, results) => {
-      if (err) return res.status(500).json({ erro: err.message });
-      res.json(results);
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('Erro /usuarios/id:', err);
+      return res.status(500).json({ erro: err.message });
     }
-  );
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ erro: 'Utilizador não encontrado' });
+    }
+
+    res.json(results); // retorna array mesmo com 1 item
+  });
 });
 
-//VERIFICAR UTILIZADOR
+// Atualizar foto de perfil
+app.post('/usuarios/foto', autenticar, uploadProfile.single('imagem'), (req, res) => {
+  const userId = req.userId;
+  if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
+
+  const fotoUrl = `/FTperfil/${req.file.filename}`;
+  db.query('UPDATE usuarios SET foto_url = ? WHERE id = ?', [fotoUrl, userId], (err, result) => {
+    if (err) {
+      console.error('Erro ao atualizar foto de perfil:', err);
+      return res.status(500).json({ erro: 'Erro ao atualizar foto de perfil.' });
+    }
+    return res.json({ msg: 'Foto de perfil atualizada com sucesso.', foto_url: fotoUrl });
+  });
+});
+
+
+
+//verificar utilizador para recuperar palavra passe
 app.post("/recuperar/verificar", async (req, res) => {
   const { email, nome } = req.body;
 
@@ -123,7 +182,7 @@ app.post("/recuperar/verificar", async (req, res) => {
   }
 });
 
-// ✅ ETAPA 2 - ALTERAR SENHA
+//recuperar a palavra passe
 app.post("/recuperar/alterar", async (req, res) => {
   const { email, nome, novaSenha } = req.body;
 
@@ -151,8 +210,7 @@ app.post("/recuperar/alterar", async (req, res) => {
   }
 });
 
-//PRODUTOS
-
+//produtos
 app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   const { titulo, descricao, preco, categoria } = req.body;
   const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
@@ -174,7 +232,7 @@ app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   );
 });
 
-// LISTAR PRODUTOS
+// listar produtos
 app.get("/produtos", (req, res) => {
   const sql = `
     SELECT p.*, u.nome AS usuario_nome 
@@ -188,7 +246,7 @@ app.get("/produtos", (req, res) => {
   });
 });
 
-// INICIAR SERVIDOR
+//inicia o servidor
 app.listen(3000, () =>
   console.log("Servidor rodando em http://localhost:3000")
 );

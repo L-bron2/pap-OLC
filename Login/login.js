@@ -35,16 +35,16 @@ document.getElementById("formLogin").addEventListener("submit", async function (
         try {
             result = await response.json();
         } catch (jsonError) {
-            mostrarAlerta("Erro do servidor.");
+            mostrarAlerta("Erro no servidor.");
             return;
         }
 
         if (response.ok) {
+            // salvar token e redirecionar
             localStorage.setItem('token', result.token);
             window.location.href = "../inicio/inicio.html";
-            localStorage.setItem('token', data.token);
         } else {
-            mostrarAlerta(result.err || result.erro || "Email ou palavra passe errada");
+            mostrarAlerta(result.err || result.erro || "Email ou palavra passe incorreto");
         }
     } catch (error) {
         mostrarAlerta("Erro de conexão com o servidor: " + error.message);

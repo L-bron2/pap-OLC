@@ -19,14 +19,23 @@
                 <li><a href="../Perfil/perfil.html">Perfil</a></li>
             </ul>
       </nav>
-      <h1>Perfil</h1>
-      <div id="usuarios" class="usuarios"></div>
-      <div class="infoUtilizador"></div>
-
-      <div class="alerta"></div>
+            <h1>Perfil</h1>
+            <div class="profile-container">
+                <div class="profile-grid">
+                    <div class="profile-card" id="profileCard">
+                        <div style="width:100%" class="center" id="uploadArea">
+                            <input type="file" id="imagem" name="imagem" class="input" accept="image/*" />
+                            <button id="btnUploadFoto" class="btn" style="margin-left:10px;background:var(--cor-roxo);color:#fff">Atualizar foto</button>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <div id="usuarios" class="usuarios"></div>
+                        <div class="infoUtilizador"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="alerta" id="alerta" style="display:none">Alerta</div>
     </div>
-
-
 
     <script src="perfil.js"></script>
 </body>
