@@ -8,7 +8,7 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 
-// iniciar express  ← 🔹 MOVEU-SE PARA CIMA
+// iniciar express  
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -23,6 +23,7 @@ if (!fs.existsSync("FTperfil")) {
   fs.mkdirSync("FTperfil");
 }
 
+
 // MULTER(para upload de imagens dos perfis)
 const imgStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -33,7 +34,6 @@ const imgStorage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-// configurar multer para perfis (usar a opção 'storage')
 const uploadProfile = multer({ storage: imgStorage });
 
 // conexão com o banco de dados 
@@ -44,7 +44,7 @@ const db = mysql.createConnection({
   database: "OLC",
 });
 
-// verificar conexão (ajuda a diagnosticar erros 500 quando o BD não está disponível)
+// verificar conexão 
 db.connect((err) => {
   if (err) {
     console.error('Erro ao conectar ao MySQL:', err.message);
@@ -120,7 +120,7 @@ app.post("/usuarios", async (req, res) => {
   );
 });
 
-// Obter o utilizador logado
+// utilizador logado
 app.get("/usuarios/id", autenticar, (req, res) => {
   const userId = req.userId;
   const sql = `SELECT id, nome, email, foto_url FROM usuarios WHERE id = ?`;
@@ -135,7 +135,7 @@ app.get("/usuarios/id", autenticar, (req, res) => {
       return res.status(404).json({ erro: 'Utilizador não encontrado' });
     }
 
-    res.json(results); // retorna array mesmo com 1 item
+    res.json(results); 
   });
 });
 
@@ -144,7 +144,7 @@ app.post('/usuarios/foto', autenticar, uploadProfile.single('imagem'), (req, res
   const userId = req.userId;
   if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
 
-  const fotoUrl = `/FTperfil/${req.file.filename}`;
+  const fotoUrl = `http://localhost:3000/FTperfil/${req.file.filename}`;;
   db.query('UPDATE usuarios SET foto_url = ? WHERE id = ?', [fotoUrl, userId], (err, result) => {
     if (err) {
       console.error('Erro ao atualizar foto de perfil:', err);

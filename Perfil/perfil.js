@@ -24,11 +24,11 @@ if (!token) {
     mostrarAlerta("Sem sessão iniciada, faça login.", "#ff3b30");
     setTimeout(() => {
         window.location.href = "../Login/login.html";
-    }, 2000);
+    }, 1400);
 }
 
 // Carregar dados do utilizador logado
-async function loadProfile() {
+async function carregarPerfil() {
     try {
         const headers = {};
         if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -56,6 +56,7 @@ async function loadProfile() {
         const foto = usuario.foto_url || "../imagens/default.png";
         const nome = usuario.nome || '';
         const email = usuario.email || '';
+        const descricao = usuario.descricao || usuario.bio || '';
         const dataRaw = usuario.data_publicacao;
         let dataFmt = "-";
         try { if (dataRaw) dataFmt = new Date(dataRaw).toLocaleDateString(); } catch {}
@@ -64,30 +65,189 @@ async function loadProfile() {
         const profileCard = document.getElementById('profileCard');
         if (profileCard) {
             profileCard.innerHTML = `
-                <div class="avatar"><img id="avatarImg" src="${foto}" alt="avatar"></div>
+                <div class="avatar"><img id="avatarImg" src="${foto}" alt=""></div>
                 <div class="username">${nome}</div>
                 <div class="user-email">${email}</div>
                 <div class="user-since">Desde: ${dataFmt}</div>
                 <div class="edit-actions">
-                  <button id="btnEditar" class="btn btn-edit">Editar</button>
-                  <button id="btnSair" class="btn btn-logout">Sair</button>
+                    <button id="btnEditar" class="btn btn-edit">Editar bio</button>
+                    <button id="btnAtualizarFoto" class="btn" style="background:var(--cor-roxo);color:#fff">Atualizar foto</button>
+                    <button id="btnSair" class="btn btn-logout">Sair</button>
                 </div>
             `;
+
+            // criar input oculto para abrir explorador quando usuário clicar em "Atualizar foto"
+            const inputImagem = document.createElement('input');
+            inputImagem.type = 'file';
+            inputImagem.id = 'imagem';
+            inputImagem.name = 'imagem';
+            inputImagem.accept = 'image/*';
+            inputImagem.style.display = 'none';
+            profileCard.appendChild(inputImagem);
+
+            // adicionar área de edição (inicialmente escondida) se necessário (será criada ao clicar em Editar)
         }
 
         // preencher secção de detalhes (se necessário)
         div.innerHTML = `
             <div class="section-title">Informações</div>
-            <p class="bio">Nome: ${nome}</p>
-            <p class="bio">Email: ${email}</p>
+            <p class="bio" id="bioText">${descricao ? descricao : 'Adicione uma descrição sobre si mesmo.'}</p>
+            <div class="infoUtilizador"></div>
         `;
 
-        // configurar botão sair
+        //Carregar produtos do utilizador logado 
+        const usuarioId = usuario.id;
+        // criar container para os produtos do utilizador
+        const produtosSection = document.createElement('div');
+        produtosSection.className = 'produtos-section';
+        produtosSection.innerHTML = `
+            <div class="section-title">Meus produtos</div>
+            <div class="produtos-grid" id="meusProdutos"></div>
+        `;
+        div.appendChild(produtosSection);
+
+        // buscar todos os produtos e filtrar pelo usuario_id
+        try {
+            const resp = await fetch('http://localhost:3000/produtos');
+            if (resp.ok) {
+                const todos = await resp.json();
+                const meus = todos.filter(p => p.usuario_id === usuarioId);
+                const grid = document.getElementById('meusProdutos');
+                if (grid) {
+                    grid.innerHTML = '';
+                    if (meus.length === 0) {
+                        grid.innerHTML = '<p>Sem produtos.</p>';
+                        const criarProduto = document.createElement('button');
+                        criarProduto.innerText = 'Criar Produto';
+                        criarProduto.className = 'btn btn-criar-produto';
+                        criarProduto.addEventListener('click', () => {
+                            window.location.href = '../produtos/criar_produto.html';
+                        });
+                        grid.appendChild(criarProduto);
+                    } else {
+                        meus.forEach(produto => {
+                            const card = document.createElement('div');
+                            card.className = 'produto-card';
+                            card.innerHTML = `
+                                <img src="${produto.imagem_url || '../imagens/default.png'}" alt=""> 
+                                <div class="produto-titulo">${produto.titulo}</div>
+                                <div class="produto-preco">${produto.preco}€</div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    }
+                }
+            } else {
+                console.warn('Falha ao carregar produtos:', resp.status);
+            }
+        } catch (err) {
+            console.error('Erro ao buscar produtos:', err);
+        }
+
+        // configurar eventos dos botões
         const btnSair = document.getElementById('btnSair');
         if (btnSair) {
             btnSair.addEventListener('click', () => {
                 localStorage.removeItem('token');
                 window.location.href = '../Login/login.html';
+            });
+        }
+
+        const btnAtualizarFoto = document.getElementById('btnAtualizarFoto');
+        const inputFile = document.getElementById('imagem');
+        if (btnAtualizarFoto && inputFile) {
+            // quando clicar, abre o explorador
+            btnAtualizarFoto.addEventListener('click', () => inputFile.click());
+
+            // ao escolher ficheiro, enviar automaticamente
+            inputFile.addEventListener('change', async () => {
+                const arquivo = inputFile.files[0];
+                if (!arquivo) return;
+                if (!arquivo.type.startsWith('image/')) {
+                    mostrarAlerta('O arquivo selecionado não é uma imagem.', '#ff3b30');
+                    return;
+                }
+
+                const formulario = new FormData();
+                formulario.append('imagem', arquivo);
+
+                try {
+                    const resposta = await fetch('http://localhost:3000/usuarios/foto', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formulario
+                    });
+
+                    let resultado = {};
+                    try { resultado = await resposta.json(); } catch (e) { }
+
+                    if (resposta.ok) {
+                        mostrarAlerta(resultado.msg || 'Foto atualizada com sucesso!', '#4BB543');
+                        const avatarImg = document.getElementById('avatarImg');
+                        if (avatarImg && resultado.foto_url) avatarImg.src = resultado.foto_url;
+                    } else {
+                        mostrarAlerta(resultado.erro || 'Erro ao atualizar foto.', '#ff3b30');
+                    }
+                } catch (err) {
+                    mostrarAlerta('Erro de conexão: ' + err.message, '#ff3b30');
+                }
+            });
+        }
+
+        // Editar bio
+        const btnEditar = document.getElementById('btnEditar');
+        if (btnEditar) {
+            btnEditar.addEventListener('click', () => {
+                // se já existir área de edição, não criar outra
+                if (document.getElementById('editArea')) return;
+
+                const bioText = document.getElementById('bioText');
+                const textoAtual = bioText ? bioText.innerText : '';
+
+                const area = document.createElement('div');
+                area.id = 'editArea';
+                area.className = 'edit-area';
+                area.innerHTML = `
+                    <textarea id="descricaoInput" placeholder="Escreva algo sobre si...">${textoAtual === 'Adicione uma descrição sobre si mesmo.' ? '' : textoAtual}</textarea>
+                    <div class="save-cancel">
+                        <button id="btnSaveDesc" class="btn btn-save">Guardar</button>
+                        <button id="btnCancelDesc" class="btn btn-cancel">Cancelar</button>
+                    </div>
+                `;
+
+                const detalhes = document.querySelector('.profile-details');
+                if (detalhes) detalhes.appendChild(area);
+
+                const btnCancelar = document.getElementById('btnCancelDesc');
+                const btnGuardar = document.getElementById('btnSaveDesc');
+
+                btnCancelar.addEventListener('click', () => {
+                    area.remove();
+                });
+
+                btnGuardar.addEventListener('click', async () => {
+                    const novoTexto = document.getElementById('descricaoInput').value.trim();
+                    // Atualizar DOM imediatamente
+                    if (bioText) bioText.innerText = novoTexto || 'Adicione uma descrição sobre si mesmo.';
+                    area.remove();
+
+                    // Tentar persistir no servidor (se o endpoint existir)
+                    try {
+                        const resp = await fetch('http://localhost:3000/usuarios', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ descricao: novoTexto })
+                        });
+                        if (resp.ok) {
+                            mostrarAlerta('Descrição atualizada com sucesso!', '#4BB543');
+                        } else {
+                            // endpoint possivelmente não implementado; informar o utilizador
+                            mostrarAlerta('Descrição atualizada localmente. Persistência no servidor não disponível.', '#ffb84d');
+                        }
+                    } catch (err) {
+                        mostrarAlerta('Não foi possível gravar no servidor. Atualizado localmente.', '#ffb84d');
+                    }
+                });
             });
         }
 
@@ -98,54 +258,6 @@ async function loadProfile() {
 }
 
 window.onload = function(){
-    // carregar perfil
-    loadProfile();
-
-    // configurar upload de foto
-    const imagemInput = document.getElementById('imagem');
-    const btnUpload = document.getElementById('btnUploadFoto');
-
-    if (btnUpload) {
-        btnUpload.addEventListener('click', async () => {
-            if (!token) {
-                mostrarAlerta('Precisa fazer login para atualizar a foto.', '#ff3b30');
-                return;
-            }
-            const file = imagemInput.files[0];
-            if (!file) {
-                mostrarAlerta('Selecione uma imagem válida.', '#ff3b30');
-                return;
-            }
-            if (!file.type.startsWith('image/')) {
-                mostrarAlerta('O arquivo selecionado não é uma imagem.', '#ff3b30');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('imagem', file);
-
-            try {
-                const response = await fetch('http://localhost:3000/usuarios/foto', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-
-                let result = {};
-                try { result = await response.json(); } catch (e) { }
-
-                if (response.ok) {
-                    mostrarAlerta(result.msg || 'Foto atualizada com sucesso!', '#4BB543');
-                    // atualizar avatar mostrado sem recarregar a página
-                    const avatarImg = document.getElementById('avatarImg');
-                    if (avatarImg && result.foto_url) avatarImg.src = result.foto_url;
-                } else {
-                    mostrarAlerta(result.erro || 'Erro ao atualizar foto.', '#ff3b30');
-                }
-            } catch (err) {
-                mostrarAlerta('Erro de conexão: ' + err.message, '#ff3b30');
-            }
-        });
-    }
+    carregarPerfil();
 };
 

@@ -1,3 +1,22 @@
+// Função para mostrar alertas
+function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
+    const alerta = document.getElementById('alerta');
+    if (!alerta) return; 
+    alerta.innerHTML = `
+        <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
+        ${mensagem}
+        <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
+    `;
+    alerta.style.background = cor;
+    alerta.classList.add('mostrar');
+    alerta.style.display = 'block';
+
+    setTimeout(() => {
+        alerta.classList.remove('mostrar');
+        alerta.style.display = 'none';
+    }, 3000);
+}
+
 function pesquisar() {
     let input = document.getElementById("pesquisar").value.toLowerCase();
     let produtos = document.getElementsByClassName("produto");
@@ -38,8 +57,7 @@ window.onload = async function () {
       div.appendChild(item);
     });
   } catch (error) {
-    document.getElementById("Produtos").innerText =
-      "Erro ao carregar produtos.";
+    mostrarAlerta("Erro ao carregar produtos: " + error.message);
   }
 };
 
