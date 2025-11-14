@@ -216,7 +216,7 @@ app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   const sql = `
-    INSERT INTO produtos (usuario_id, titulo, descricao, preco, categoria, imagem_url)
+    INSERT INTO produtos (vendedor, titulo, descricao, preco, categoria, imagem_url)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
 
@@ -237,7 +237,7 @@ app.get("/produtos", (req, res) => {
   const sql = `
     SELECT p.*, u.nome AS usuario_nome 
     FROM produtos p
-    JOIN usuarios u ON p.usuario_id = u.id
+    JOIN usuarios u ON p.vendedor = u.id
     ORDER BY p.data_publicacao DESC
   `;
   db.query(sql, (err, results) => {

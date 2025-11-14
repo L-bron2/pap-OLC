@@ -21,7 +21,7 @@ function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
 
 // Verificar se existe token
 if (!token) {
-    mostrarAlerta("Sem sessão iniciada, faça login.", "#ff3b30");
+    mostrarAlerta("Faça login!.", "#ff3b30");
     setTimeout(() => {
         window.location.href = "../Login/login.html";
     }, 1400);
@@ -121,7 +121,7 @@ async function carregarPerfil() {
                         criarProduto.innerText = 'Criar Produto';
                         criarProduto.className = 'btn btn-criar-produto';
                         criarProduto.addEventListener('click', () => {
-                            window.location.href = '../produtos/criar_produto.html';
+                            window.location.href = "../produtos/novo_produto.html";
                         });
                         grid.appendChild(criarProduto);
                     } else {

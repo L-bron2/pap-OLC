@@ -1,32 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inicio</title>
-    <link rel="stylesheet" href="inicio.css">
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
-<body>
+    <link rel="stylesheet" href="inicio.css" />
+    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+  <body>
     <div class="main">
-        <nav>
-            <a href="#" class="logo">Trovix</a>
-            <div class="navbar-links">
-                <ul class="navbar-links">
-                    <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
-                    <li><a href="../chat/caht.html"><span class="material-symbols-outlined">chat</span></a></li>
-                    <li><a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a></li>
-                    <li><a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a></li>
-                </ul>
-                <input type="text" placeholder="Procurar..." class="Procurar" id="pesquisar" onkeyup="pesquisar()">
-            </div>
+      <nav>
+        <a href="#" class="logo">Trovix</a>
+        <div class="navbar-links">
+          <ul class="navbar-links">
+            <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
+            <li><a href="../conversas/chat.html"><span class="material-symbols-outlined">chat</span></a></li>
+            <li><a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a></li>
+            <li><a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a></li>
+          </ul>
+        </div>
+        <input type="text" placeholder="Procurar..." class="Procurar" id="pesquisar" onkeyup="pesquisar()"/>
       </nav>
-        <div id="Produtos" class="Produtos"></div>
-        <div class="titulo"></div>
-        <a href="../produtos/novo_produto.html" ><button class="BTN_Produto">Novo produto</button></a>
+
+      <div id="caixaFlutuante" class="caixaFlutuante" style="display: none">
+        <div class="detalhes">
+          <span id="fechar" class="fechar">&times;</span>
+          <div class="modal-body">
+            <div class="modal-image-wrap"><img id="modalImagem" class="modal-img" src="" alt="Imagem do produto"/></div>
+            
+            <div class="modal-content">
+              <h2 id="nome"></h2>
+              <p id="Preco" class="modal-preco"></p>
+              <p id="descricao"></p>
+              <p id="vendedor"></p>
+              <div class="modal-actions"><button id="BTN" class="BTN">Enviar mensagem ao vendedor</button></div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div id="produtos-container" class="Produtos"></div>
+      <div class="titulo"></div>
+      <a href="../produtos/novo_produto.html"><button class="BTN_Produto">Novo produto</button></a>
+
+      <div class="alerta" id="alerta" style="display: none;">Alerta</div>
     </div>
 
+
     <script src="inicio.js"></script>
-</body>
+  </body>
 </html>
