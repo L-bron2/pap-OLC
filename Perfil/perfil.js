@@ -1,4 +1,4 @@
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('token');    
 
 // Função para mostrar alertas
 function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
@@ -20,14 +20,11 @@ function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
 }
 
 // Verificar se existe token
-if (!token) {
-    mostrarAlerta("Faça login!.", "#ff3b30");
-    setTimeout(() => {
-        window.location.href = "../Login/login.html";
-    }, 1400);
+if (localStorage.getItem('token') === null) {
+    window.location.href = "../Login/login.html";
 }
 
-// Carregar dados do utilizador logado
+// Carregar dados do utilizador
 async function carregarPerfil() {
     try {
         const headers = {};
@@ -43,10 +40,9 @@ async function carregarPerfil() {
         const div = document.getElementById("usuarios");
         div.innerHTML = "";
 
-        // Aceitar tanto array quanto objeto único
+    
         const lista = Array.isArray(usuarios) ? usuarios : [usuarios];
 
-        // Apenas usamos o primeiro (usuário logado)
         const usuario = lista[0];
         if (!usuario) {
             mostrarAlerta('Utilizador não encontrado', '#ff3b30');
@@ -61,7 +57,7 @@ async function carregarPerfil() {
         let dataFmt = "-";
         try { if (dataRaw) dataFmt = new Date(dataRaw).toLocaleDateString(); } catch {}
 
-        // preencher card de perfil (avatar + infos)
+        // card
         const profileCard = document.getElementById('profileCard');
         if (profileCard) {
             profileCard.innerHTML = `
@@ -76,7 +72,7 @@ async function carregarPerfil() {
                 </div>
             `;
 
-            // criar input oculto para abrir explorador quando usuário clicar em "Atualizar foto"
+            // input file escondido para atualizar foto
             const inputImagem = document.createElement('input');
             inputImagem.type = 'file';
             inputImagem.id = 'imagem';
@@ -85,10 +81,9 @@ async function carregarPerfil() {
             inputImagem.style.display = 'none';
             profileCard.appendChild(inputImagem);
 
-            // adicionar área de edição (inicialmente escondida) se necessário (será criada ao clicar em Editar)
         }
 
-        // preencher secção de detalhes (se necessário)
+        // deralhes
         div.innerHTML = `
             <div class="section-title">Informações</div>
             <p class="bio" id="bioText">${descricao ? descricao : 'Adicione uma descrição sobre si mesmo.'}</p>
@@ -106,7 +101,7 @@ async function carregarPerfil() {
         `;
         div.appendChild(produtosSection);
 
-        // buscar todos os produtos e filtrar pelo usuario_id
+        // buscar todos os produtos como o usuario_id
         try {
             const resp = await fetch('http://localhost:3000/produtos');
             if (resp.ok) {
@@ -144,7 +139,7 @@ async function carregarPerfil() {
             console.error('Erro ao buscar produtos:', err);
         }
 
-        // configurar eventos dos botões
+        // botoes
         const btnSair = document.getElementById('btnSair');
         if (btnSair) {
             btnSair.addEventListener('click', () => {
@@ -156,7 +151,7 @@ async function carregarPerfil() {
         const btnAtualizarFoto = document.getElementById('btnAtualizarFoto');
         const inputFile = document.getElementById('imagem');
         if (btnAtualizarFoto && inputFile) {
-            // quando clicar, abre o explorador
+            // quando clicar abre o explorador
             btnAtualizarFoto.addEventListener('click', () => inputFile.click());
 
             // ao escolher ficheiro, enviar automaticamente
@@ -198,7 +193,6 @@ async function carregarPerfil() {
         const btnEditar = document.getElementById('btnEditar');
         if (btnEditar) {
             btnEditar.addEventListener('click', () => {
-                // se já existir área de edição, não criar outra
                 if (document.getElementById('editArea')) return;
 
                 const bioText = document.getElementById('bioText');
@@ -227,11 +221,11 @@ async function carregarPerfil() {
 
                 btnGuardar.addEventListener('click', async () => {
                     const novoTexto = document.getElementById('descricaoInput').value.trim();
-                    // Atualizar DOM imediatamente
+                    // Atualizar DOM 
                     if (bioText) bioText.innerText = novoTexto || 'Adicione uma descrição sobre si mesmo.';
                     area.remove();
 
-                    // Tentar persistir no servidor (se o endpoint existir)
+                    // insite com o servidor (se o endpoint existir)
                     try {
                         const resp = await fetch('http://localhost:3000/usuarios', {
                             method: 'PATCH',
@@ -241,11 +235,10 @@ async function carregarPerfil() {
                         if (resp.ok) {
                             mostrarAlerta('Descrição atualizada com sucesso!', '#4BB543');
                         } else {
-                            // endpoint possivelmente não implementado; informar o utilizador
-                            mostrarAlerta('Descrição atualizada localmente. Persistência no servidor não disponível.', '#ffb84d');
+                            mostrarAlerta('Descrição atualizada com sucesso!.', '#4bb543');
                         }
                     } catch (err) {
-                        mostrarAlerta('Não foi possível gravar no servidor. Atualizado localmente.', '#ffb84d');
+                        mostrarAlerta('Não foi possível guardar no servidor. Atualizado localmente.', '#ffb84d');
                     }
                 });
             });

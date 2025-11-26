@@ -1,4 +1,4 @@
-// FUNÇÃO PARA MOSTRAR ALERTAS
+//função para alertas
 function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
   const alerta = document.getElementById("alerta");
   alerta.innerHTML = `
@@ -16,7 +16,7 @@ function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
   }, 3000);
 }
 
-//VERIFICAR UTILIZADOR
+//verificar utilizador
 document
   .getElementById("BTN_verificar")
   .addEventListener("click", async (e) => {

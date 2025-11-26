@@ -1,32 +1,31 @@
-function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
-    const alerta = document.getElementById('alerta');
-    alerta.innerHTML = `
+function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
+  const alerta = document.getElementById("alerta");
+  alerta.innerHTML = `
         <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
         ${mensagem}
         <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
     `;
-    alerta.style.background = cor;
-    alerta.classList.add('mostrar');
-    alerta.style.display = 'block';
+  alerta.style.background = cor;
+  alerta.classList.add("mostrar");
+  alerta.style.display = "block";
 
-    setTimeout(() => {
-        alerta.classList.remove('mostrar');
-        alerta.style.display = 'none';
-    }, 3000);
+  setTimeout(() => {
+    alerta.classList.remove("mostrar");
+    alerta.style.display = "none";
+  }, 3000);
 }
 
-
 function pesquisar() {
-  let input = document.getElementById("pesquisar").value.toLowerCase();
-  let produtos = document.getElementsByClassName("produto");
+  const input = document.getElementById("pesquisar").value.toLowerCase();
+  const produtos = document.getElementsByClassName("produto");
+
   for (let i = 0; i < produtos.length; i++) {
-    let titulo = produtos[i].getElementsByTagName("h2")[0];
-    if (titulo && titulo.innerHTML.toLowerCase().includes(input)) {
-      produtos[i].style.display = "flex";
-    } else {
-      produtos[i].style.display = "none";
-    }
-  } 
+    const titulo = produtos[i].querySelector("h3");
+    produtos[i].style.display =
+      titulo && titulo.textContent.toLowerCase().includes(input)
+        ? "flex"
+        : "none";
+  }
 }
 
 window.onload = function () {
@@ -41,8 +40,6 @@ window.onload = function () {
   const modalImagem = document.getElementById("modalImagem");
   const modalPreco = document.getElementById("Preco");
 
-
-  //carregar produtos
   fetch("http://localhost:3000/produtos")
     .then((res) => res.json())
     .then((produtos) => {
@@ -52,9 +49,22 @@ window.onload = function () {
         const div = document.createElement("div");
         div.classList.add("produto");
 
+        const favoritoBTN = document.createElement("button");
+        favoritoBTN.classList.add("favoritoBTN");
+        favoritoBTN.innerHTML = `<span class="material-symbols-outlined">favorite</span>`;
+        favoritoBTN.onclick = (e) => {
+          e.stopPropagation();
+          mostrarAlerta(
+            `${produto.titulo} adicionado aos favoritos!`,
+            "#fa6db3ff",
+            `<span class="material-symbols-outlined">favorite</span>`
+          );
+        };
+        div.appendChild(favoritoBTN);
+
         div.innerHTML = `
           <h3>${produto.titulo}</h3>
-          <img src="http://localhost:3000${produto.imagem_url}" alt="${
+          <img src="http://localhost:3000${produto.imagem_url || ""}" alt="${
           produto.titulo
         }">
           <p>${produto.descricao}</p>
@@ -65,25 +75,48 @@ window.onload = function () {
           ).toLocaleDateString()}</p>
         `;
 
-        // abre o modal quando clias em algum produto
         div.addEventListener("click", () => {
           modal.style.display = "flex";
+
           modalNome.textContent = produto.titulo;
-          if (modalImagem) {
-            modalImagem.src = produto.imagem_url
-              ? `http://localhost:3000${produto.imagem_url}`
-              : "";
-            modalImagem.alt = produto.titulo || "Imagem do produto";
-          }
-          if (modalPreco)
-            modalPreco.textContent = produto.preco
-              ? `Preço: ${produto.preco}€`
-              : "";
           modalDescricao.textContent = produto.descricao;
-          modalVendedor.textContent = `Vendedor: ${produto.usuario_nome || ""}`;
+          modalVendedor.textContent = `Vendedor: ${
+            produto.usuario_nome || "Vendedor"
+          }`;
+          modalImagem.src = produto.imagem_url
+            ? `http://localhost:3000${produto.imagem_url}`
+            : "";
+          modalImagem.alt = produto.titulo || "Imagem do produto";
+          modalPreco.textContent = produto.preco
+            ? `Preço: ${produto.preco}€`
+            : "";
+
           modalBTN.onclick = () => {
-            mostrarAlerta(`Mensagem enviada para ${produto.usuario_nome}!`);
-            window.location.href = '../conversas/chat.html';
+            const vendedorId =
+              produto.vendedor ||
+              produto.vendedor_id ||
+              produto.vendedorId ||
+              produto.usuario_id;
+
+            if (!vendedorId) {
+              return mostrarAlerta("Vendedor não encontrado", "#ff3b30");
+            }
+
+            mostrarAlerta(
+              `Abrindo conversa com ${produto.usuario_nome || "Vendedor"}...`,
+              "#00cc66"
+            );
+
+            const produtoId =
+              produto.id || produto.produto_id || produto.produtoId || "";
+
+            const url = `../conversas/chat.html?vendedor=${encodeURIComponent(
+              vendedorId
+            )}${
+              produtoId ? "&produto=" + encodeURIComponent(produtoId) : ""
+            }&nome=${encodeURIComponent(produto.usuario_nome || "Vendedor")}`;
+
+            window.location.href = url;
           };
         });
 
@@ -91,19 +124,17 @@ window.onload = function () {
       });
     })
     .catch((err) => {
+      console.error(err);
       mostrarAlerta("Erro ao carregar produtos.", "#ff3b30");
     });
 
-  // fechar o modal 
   fechar.addEventListener("click", () => {
     modal.style.display = "none";
   });
 
-  // Fechar o modal se clicar fora da caixa
   window.addEventListener("click", (event) => {
     if (event.target === modal) {
       modal.style.display = "none";
     }
   });
-
 };

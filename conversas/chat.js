@@ -1,44 +1,223 @@
-// Função para mostrar alertas
-function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
-    const alerta = document.getElementById('alerta');
-    if (!alerta) return; 
-    alerta.innerHTML = `
-        <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
-        ${mensagem}
-        <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
-    `;
-    alerta.style.background = cor;
-    alerta.classList.add('mostrar');
-    alerta.style.display = 'block';
+function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
+  const alerta = document.getElementById("alerta");
+  alerta.innerHTML = `
+    <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
+    ${mensagem}
+    <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
+  `;
+  alerta.style.background = cor;
+  alerta.classList.add("mostrar");
+  alerta.style.display = "block";
 
-    setTimeout(() => {
-        alerta.classList.remove('mostrar');
-        alerta.style.display = 'none';
-    }, 3000);
+  setTimeout(() => {
+    alerta.classList.remove("mostrar");
+    alerta.style.display = "none";
+  }, 3000);
 }
 
-// Carregar conversas
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+//verifica se o utilizador esta logado e se tiver pode enviar mensagens 
 window.onload = async function () {
-  try {
-    const response = await fetch("http://localhost:3000/mensagens", {
-      headers: {
-        Authorization: `Bearer ${token}`
+  const token = localStorage.getItem("token");
+  if (!token) {
+    mostrarAlerta("Faça login primeiro!");
+    return setTimeout(() => (window.location.href = "../Login/login.html"), 1500);
+  }
+
+  const listaConversas = document.getElementById("listaConversas");
+  const chatMensagens = document.getElementById("chatMensagens");
+  const chatUserName = document.getElementById("chatUserName");
+  const inputMensagem = document.getElementById("inputMensagem");
+  const btnEnviar = document.getElementById("btnEnviar");
+
+  let conversaAtiva = null;
+
+  //verifica o id do utilizador a partir do token
+  function getUserId() {
+    try {
+      return JSON.parse(atob(token.split(".")[1])).id;
+    } catch {
+      mostrarAlerta("Token inválido");
+      return null;
+    }
+  }
+
+  async function carregarConversas() {
+    try {
+      const r = await fetch("http://localhost:3000/mensagens", {
+        headers: { Authorization: "Bearer " + token }
+      });
+      if (!r.ok) throw new Error("Falha ao carregar conversas");
+      const msgs = await r.json();
+      listaConversas.innerHTML = "";
+      const grupos = {};
+
+      msgs.forEach(m => {
+        const outro = m.remetente_id === getUserId() ? m.destinatario_id : m.remetente_id;
+        if (!grupos[outro]) grupos[outro] = [];
+        grupos[outro].push(m);
+      });
+
+      const entradas = Object.keys(grupos).map(uid => {
+        const ult = grupos[uid][0];
+        const nome = ult.remetente_id == uid ? ult.remetente_nome : ult.destinatario_nome;
+        return { uid, nome, ultimo: ult.mensagem || "", data: new Date(ult.data_envio).getTime() };
+      }).sort((a, b) => b.data - a.data);
+
+      entradas.forEach(e => atualizarOuCriarConversa(e.uid, e.nome, e.ultimo));
+    } catch (err) {
+      mostrarAlerta(err.message);
+    }
+  }
+
+  function atualizarOuCriarConversa(outroId, nome, ultimo) {
+    const key = String(outroId);
+    let existente = listaConversas.querySelector(`[data-uid="${key}"]`);
+
+    if (!existente) {
+      existente = document.createElement("div");
+      existente.className = "conversa-item";
+      existente.dataset.uid = key;
+      listaConversas.insertBefore(existente, listaConversas.firstChild);
+    }
+
+    existente.innerHTML = `
+      <div class="meta">
+        <div class="nome">${nome || "Sem nome"}</div>
+        <div class="ultimo">${(ultimo || "").slice(0, 40)}</div>
+      </div>
+    `;
+
+    existente.onclick = () => abrirConversa(outroId, nome);
+    listaConversas.querySelectorAll(".conversa-item").forEach(it => it.classList.remove("ativa"));
+    existente.classList.add("ativa");
+  }
+
+  function garantirConversa(outroId, nome) {
+    if (!outroId) return;
+    const key = String(outroId);
+    if (listaConversas.querySelector(`[data-uid="${key}"]`)) return;
+
+    const div = document.createElement("div");
+    div.className = "conversa-item";
+    div.dataset.uid = key;
+    div.innerHTML = `
+      <div class="meta">
+        <div class="nome">${nome || "Vendedor"}</div>
+        <div class="ultimo">Sem mensagens ainda</div>
+      </div>
+    `;
+    div.onclick = () => abrirConversa(outroId, nome || "Vendedor");
+    listaConversas.insertBefore(div, listaConversas.firstChild);
+  }
+
+  async function abrirConversa(outroId, nome) {
+    conversaAtiva = Number(outroId);
+    if (isNaN(conversaAtiva)) return mostrarAlerta("ID da conversa inválido");
+    chatUserName.textContent = nome;
+    garantirConversa(outroId, nome);
+    listaConversas.querySelectorAll(".conversa-item").forEach(it => it.classList.remove("ativa"));
+    const atual = listaConversas.querySelector(`[data-uid="${String(outroId)}"]`);
+    if (atual) atual.classList.add("ativa");
+    carregarMensagensConversa();
+  }
+
+  async function carregarMensagensConversa() {
+    if (!conversaAtiva) return;
+
+    try {
+      const r = await fetch(`http://localhost:3000/mensagens/conversa/${conversaAtiva}`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      if (!r.ok) throw new Error("Falha ao carregar mensagens");
+      const msgs = await r.json();
+      chatMensagens.innerHTML = "";
+
+      if (!msgs || msgs.length === 0) {
+        chatMensagens.innerHTML = '<p class="placeholder">Sem mensagens ainda. Envie a primeira.</p>';
+        return;
       }
-    });
-    const conversas = await response.json();
-    const div = document.getElementById("conversas");
-    div.innerHTML = "";
-    conversas.forEach((conversa) => {
-      const item = document.createElement("div");
-      item.className = "conversa";
-      item.innerHTML = `
-                <h2>Com: ${conversa.outro_usuario_nome} (ID: ${conversa.outro_usuario_id})</h2>
-                <p>Última mensagem: ${conversa.ultima_mensagem}</p>
-                <p>Data: ${new Date(conversa.data_ultima_mensagem).toLocaleString()}</p>
-            `;
-      div.appendChild(item);
-    });
-  } catch (error) {
-    mostrarAlerta("Erro ao carregar conversas: " + error.message);
+
+      msgs.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "mensagem " + (m.remetente_id === getUserId() ? "me" : "their");
+        div.textContent = m.mensagem;
+
+        const horaDiv = document.createElement("div");
+        horaDiv.className = "hora";
+        horaDiv.textContent = new Date(m.data_envio).toLocaleString();
+
+        div.appendChild(horaDiv);
+        chatMensagens.appendChild(div);
+      });
+
+      chatMensagens.scrollTop = chatMensagens.scrollHeight;
+    } catch (err) {
+      mostrarAlerta(err.message);
+    }
+  }
+
+  btnEnviar.onclick = async () => {
+    const texto = inputMensagem.value.trim();
+    if (!texto || !conversaAtiva) return mostrarAlerta("Selecione uma conversa para enviar essa mensagem.");
+
+    const destinatario = Number(conversaAtiva);
+    if (isNaN(destinatario)) return mostrarAlerta("ID do destinatário inválido");
+
+    const produtoQuery = getQueryParam("produto");
+    const produto_id = produtoQuery ? Number(produtoQuery) : null;
+
+    try {
+      const r = await fetch("http://localhost:3000/mensagens", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({
+          destinatario_id: destinatario,
+          texto,
+          produto_id
+        })
+      });
+
+      if (!r.ok) {
+        const body = await r.json().catch(() => null);
+        throw new Error(body?.erro || "Falha ao enviar mensagem");
+      }
+
+      inputMensagem.value = "";
+      carregarMensagensConversa();
+      carregarConversas();
+    } catch (err) {
+      mostrarAlerta(err.message || String(err));
+    }
+  };
+
+  inputMensagem.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      btnEnviar.click();
+    }
+  });
+
+  carregarConversas();
+  setInterval(carregarConversas, 6000);
+
+  const vendedorQuery = getQueryParam("vendedor");
+  const nomeQuery = getQueryParam("nome");
+  if (vendedorQuery) {
+    if (nomeQuery) {
+      abrirConversa(vendedorQuery, decodeURIComponent(nomeQuery));
+    } else {
+      fetch(`http://localhost:3000/usuarios/${encodeURIComponent(vendedorQuery)}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => abrirConversa(vendedorQuery, data.nome || "Vendedor"))
+        .catch(() => abrirConversa(vendedorQuery, "Vendedor"));
+    }
   }
 };

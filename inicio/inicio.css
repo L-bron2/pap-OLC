@@ -147,7 +147,7 @@ ul.navbar-links li a:hover::after {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* ===== Cards de produtos ===== */
+/* Cards de produtos */
 .Produtos {
   display: flex;
   flex-wrap: wrap;
@@ -212,7 +212,24 @@ ul.navbar-links li a:hover::after {
   margin-top: 10px;
 }
 
-/* ===== Caixa flutuante (detalhes) ===== */
+.favoritoBTN {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.favoritoBTN span {
+  font-size: 20px;
+  color: #fa6db3;
+}
+
+/* caixa flutuate */
 #caixaFlutuante {
   position: fixed;
   inset: 0;
@@ -223,7 +240,6 @@ ul.navbar-links li a:hover::after {
   z-index: 1200;
 }
 
-/* Caixa branca */
 .detalhes {
   background: #fff;
   width: 95%;
@@ -243,7 +259,6 @@ ul.navbar-links li a:hover::after {
   width: 100%;
 }
 
-/* Imagem */
 .modal-image-wrap {
   flex: 0 0 45%;
   display: flex;
@@ -258,7 +273,6 @@ ul.navbar-links li a:hover::after {
   border-radius: 10px;
 }
 
-/* Conteúdo */
 .modal-content {
   flex: 1;
   display: flex;
@@ -291,7 +305,6 @@ ul.navbar-links li a:hover::after {
   margin: 3px 0;
 }
 
-/* Botão principal */
 .modal-actions {
   margin-top: 12px;
 }
@@ -359,6 +372,44 @@ ul.navbar-links li a:hover::after {
 .BTN_Produto:hover {
   transform: scale(1.07);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Alerta */
+.alerta {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--cor-vermelho);
+  color: white;
+  padding: 16px 22px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  min-width: 260px;
+  max-width: 90vw;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 2000;
+  font-weight: 500;
+}
+
+.alerta.mostrar {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: auto;
+}
+
+.alerta .fechar {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2em;
+  cursor: pointer;
 }
 
 /* Animação de entrada */
