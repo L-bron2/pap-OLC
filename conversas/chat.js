@@ -20,7 +20,7 @@ function getQueryParam(param) {
   return urlParams.get(param);
 }
 
-//verifica se o utilizador esta logado e se tiver pode enviar mensagens 
+//verifica se o utilizador ta logado e se tiver pode enviar mensagens 
 window.onload = async function () {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -36,7 +36,7 @@ window.onload = async function () {
 
   let conversaAtiva = null;
 
-  //verifica o id do utilizador a partir do token
+  //verifica o id do utilizador com o token
   function getUserId() {
     try {
       return JSON.parse(atob(token.split(".")[1])).id;

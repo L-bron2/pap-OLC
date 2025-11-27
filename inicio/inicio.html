@@ -26,6 +26,7 @@
         <input type="text" placeholder="Procurar..." class="Procurar" id="pesquisar" onkeyup="pesquisar()"/>
       </nav>
 
+      <!-- modal da caixa flutuante -->
       <div id="caixaFlutuante" class="caixaFlutuante" style="display: none">
         <div class="detalhes">
           <span id="fechar" class="fechar">&times;</span>
@@ -43,14 +44,17 @@
         </div>
       </div>
 
+
+      <!-- cards de produtos -->
       <div id="produtos-container" class="Produtos"></div>
       <div class="titulo"></div>
       <a href="../produtos/novo_produto.html"><button class="BTN_Produto">Novo produto</button></a>
 
+      <!-- alerta -->
       <div class="alerta" id="alerta" style="display: none;">Alerta</div>
     </div>
 
-
+    <script src="../config.js"></script>
     <script src="inicio.js"></script>
   </body>
 </html>

@@ -56,7 +56,7 @@ document
     }
   });
 
-//ALTERAR SENHA
+// alterar palavra passe
 document.getElementById("Alterar").addEventListener("click", async (e) => {
   e.preventDefault();
   const email = document.getElementById("email").value.trim();

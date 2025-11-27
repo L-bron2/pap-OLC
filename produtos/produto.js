@@ -1,6 +1,5 @@
 const token = localStorage.getItem('token');
 
-// função para mostrar alertas
 function mostrarAlerta(mensagem, cor = '#ff3b30', icone = '') {
     const alerta = document.getElementById('alerta');
     alerta.innerHTML = `
