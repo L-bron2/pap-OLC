@@ -14,6 +14,15 @@ function mostrarAlerta(mensagem, cor = "#ff3b30") {
 window.onload = async function () {
   const token = localStorage.getItem("token");
   const favoritosContainer = document.getElementById("favoritos-container");
+  const modal = document.getElementById("caixaFlutuante");
+  const fechar = document.getElementById("fechar");
+
+  const modalNome = document.getElementById("nome");
+  const modalDescricao = document.getElementById("descricao");
+  const modalVendedor = document.getElementById("vendedor");
+  const modalBTN = document.getElementById("BTN");
+  const modalImagem = document.getElementById("modalImagem");
+  const modalPreco = document.getElementById("Preco");
 
   if (!token) {
     mostrarAlerta("Faça login para ver seus favoritos", "#ff3b30");
@@ -22,13 +31,12 @@ window.onload = async function () {
   }
 
   try {
-    //procura os itens que ja foram selecionados como favoritos 
+    // pega os favoritos
     const resFavoritos = await fetch("http://localhost:3000/favoritos", {
       headers: { Authorization: "Bearer " + token },
     });
 
-    if (!resFavoritos.ok)
-      throw new Error("Erro ao carregar favoritos");
+    if (!resFavoritos.ok) throw new Error("Erro ao carregar favoritos");
 
     const favoritoIds = await resFavoritos.json();
 
@@ -43,17 +51,17 @@ window.onload = async function () {
       return;
     }
 
-    // listagem dos produtos
+    // pegar todos os produtos
     const resProdutos = await fetch("http://localhost:3000/produtos");
-    if (!resProdutos.ok)
-      throw new Error("Erro ao carregar produtos");
+    if (!resProdutos.ok) throw new Error("Erro ao carregar produtos");
 
     const todos = await resProdutos.json();
 
-    const favoritoIdsNum = favoritoIds.map(id => Number(id)); 
+    // transformar ids para número
+    const favoritoIdsNum = favoritoIds.map(id => Number(id));
 
-    // Filtrar apenas os favoritos
-    const produtosFav = todos.filter(p => favoritoIdsNum.includes(p.id)); 
+    // filtrar apenas os que tão marcados como favoritos 
+    const produtosFav = todos.filter(p => favoritoIdsNum.includes(p.id));
 
     if (produtosFav.length === 0) {
       favoritosContainer.innerHTML = `
@@ -66,8 +74,10 @@ window.onload = async function () {
       return;
     }
 
-    //cards de favoritos
+    // limpar container
     favoritosContainer.innerHTML = "";
+
+    // cards dos favoritos
     produtosFav.forEach(produto => {
       const card = document.createElement("div");
       card.className = "favorito-card";
@@ -91,26 +101,47 @@ window.onload = async function () {
         </div>
       `;
 
-      card.querySelector("button").onclick = async (e) => {
+      // abrir modal ao clicar no card 
+      card.addEventListener("click", (e) => {
+        if (e.target.classList.contains("btn-remover")) return;
+
+        modal.style.display = "flex";
+
+        modalNome.textContent = produto.titulo;
+        modalDescricao.textContent = produto.descricao;
+        modalVendedor.textContent = `Vendedor: ${produto.usuario_nome || "Vendedor"}`;
+        modalImagem.src = produto.imagem_url ? `http://localhost:3000${produto.imagem_url}` : "";
+        modalPreco.textContent = produto.preco ? `Preço: ${produto.preco}€` : "";
+
+        const vendedorId = produto.vendedor;
+
+        modalBTN.onclick = () => {
+          const url = `../conversas/chat.html?vendedor=${vendedorId}&produto=${produto.id}&nome=${encodeURIComponent(produto.usuario_nome || "Vendedor")}`;
+          window.location.href = url;
+        };
+      });
+
+      // remover favorito
+      card.querySelector(".btn-remover").onclick = async (e) => {
         e.stopPropagation();
-        const idProduto = parseInt(e.target.dataset.id);
+        const idProduto = Number(e.target.dataset.id);
 
         try {
           const res = await fetch(`http://localhost:3000/favoritos/${idProduto}`, {
             method: "DELETE",
-            headers: { 
+            headers: {
               "Authorization": "Bearer " + token,
-              "Content-Type": "application/json" 
+              "Content-Type": "application/json",
             },
           });
 
           if (!res.ok) throw new Error("Erro ao remover favorito");
 
           mostrarAlerta(`${produto.titulo} removido dos favoritos!`, "#ff9500");
+
           card.style.opacity = "0";
           setTimeout(() => card.remove(), 300);
 
-          //se não tiver favoritos
           if (favoritosContainer.children.length === 0) {
             favoritosContainer.innerHTML = `
               <div class="mensagem-vazia" style="grid-column: 1 / -1;">
@@ -128,6 +159,10 @@ window.onload = async function () {
 
       favoritosContainer.appendChild(card);
     });
+
+    // Fechar modal
+    fechar.onclick = () => (modal.style.display = "none");
+
   } catch (err) {
     mostrarAlerta(err.message, "#ff3b30");
     console.error(err);

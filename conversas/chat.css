@@ -226,6 +226,46 @@ ul.navbar-links li a:hover::after {
   cursor: pointer;
 }
 
+/* container do botão */
+.apagar-conversa {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  z-index: 20;
+}
+
+/* botão estilo clean */
+.apagar-conversa button {
+  background: #ffffff;
+  border: none;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* efeito no hover */
+.apagar-conversa button:hover {
+  background: #f44336;
+  transform: scale(1.1);
+}
+
+.apagar-conversa button:hover .material-symbols-outlined {
+  color: white;
+}
+
+/* ícone */
+.apagar-conversa .material-symbols-outlined {
+  font-size: 20px;
+  color: #444;
+  transition: color 0.2s ease;
+}
+
+
 /* Alerta */
 .alerta {
   position: fixed;

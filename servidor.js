@@ -69,7 +69,7 @@ function autenticar(req, res, next) {
   });
 }
 
-// -------------------- ROTAS DE RECUPERAÇÃO DE SENHA -------------------- //
+// -------------------- ROTAS DE RECUPERAÇÃO DA PALAVRA PASSE-------------------- //
 
 // Verificar utilizador para recuperar senha
 app.post("/recuperar/verificar", (req, res) => {
@@ -88,7 +88,7 @@ app.post("/recuperar/verificar", (req, res) => {
   );
 });
 
-// Alterar senha
+// Alterar palavra passe
 app.post("/recuperar/alterar", async (req, res) => {
   const { email, nome, novaSenha } = req.body;
   if (!email || !nome || !novaSenha)
@@ -108,6 +108,8 @@ app.post("/recuperar/alterar", async (req, res) => {
 
 // -------------------- ROTAS -------------------- //
 
+// -------------------- Conta -------------------- //
+
 // Criar conta
 app.post("/usuarios", async (req, res) => {
   const { nome, email, senha } = req.body;
@@ -124,28 +126,73 @@ app.post("/usuarios", async (req, res) => {
   );
 });
 
+// Apagar conta do utilizador logado/autenticado
+app.post("/apagarConta", autenticar, (req, res) => {
+  const userId = req.userId;
+
+  // apaga os dados das outras tabelas a onde o id do utilizador for igual
+  db.query("DELETE FROM favoritos WHERE id_usuario = ?", [userId], (err) => {
+    if (err) return res.status(500).json({ erro: err.message });
+
+    db.query(
+      "DELETE FROM mensagens WHERE remetente_id = ? OR destinatario_id = ?",
+      [userId, userId],
+      (err2) => {
+        if (err2) return res.status(500).json({ erro: err2.message });
+
+        db.query(
+          "DELETE FROM produtos WHERE vendedor = ?",
+          [userId],
+          (err3) => {
+            if (err3) return res.status(500).json({ erro: err3.message });
+
+            db.query(
+              "DELETE FROM usuarios WHERE id = ?",
+              [userId],
+              (err4, result) => {
+                if (err4) return res.status(500).json({ erro: err4.message });
+                if (!result || result.affectedRows === 0)
+                  return res
+                    .status(404)
+                    .json({ erro: "Usuário não encontrado" });
+
+                // Sucesso
+                return res.json({ msg: "Conta apagada com sucesso" });
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
 // Login
 app.post("/login", (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha)
     return res.status(400).json({ erro: "Email e senha são obrigatórios" });
 
-  db.query("SELECT * FROM usuarios WHERE email = ?", [email], async (err, results) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    if (!results || results.length === 0)
-      return res.status(401).json({ erro: "Usuário não encontrado" });
+  db.query(
+    "SELECT * FROM usuarios WHERE email = ?",
+    [email],
+    async (err, results) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      if (!results || results.length === 0)
+        return res.status(401).json({ erro: "Usuário não encontrado" });
 
-    const user = results[0];
-    const match = await bcrypt.compare(senha, user.senha);
-    if (!match)
-      return res.status(401).json({ erro: "Palavra passe incorreta" });
+      const user = results[0];
+      const match = await bcrypt.compare(senha, user.senha);
+      if (!match)
+        return res.status(401).json({ erro: "Palavra passe incorreta" });
 
-    const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
-    res.json({ token });
-  });
+      const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
+      res.json({ token });
+    }
+  );
 });
 
-// Obter usuário logado
+// get do usuário logado
 app.get("/usuarios/id", autenticar, (req, res) => {
   const sql = "SELECT id, nome, email, foto_url FROM usuarios WHERE id = ?";
   db.query(sql, [req.userId], (err, results) => {
@@ -156,7 +203,7 @@ app.get("/usuarios/id", autenticar, (req, res) => {
   });
 });
 
-// GET de um usuário específico pelo ID (público - para buscar nome do vendedor)
+// GET de um usuário específico pelo ID
 app.get("/usuarios/:id", (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ erro: "ID inválido" });
@@ -173,14 +220,26 @@ app.get("/usuarios/:id", (req, res) => {
 });
 
 // Atualizar foto de perfil
-app.post("/usuarios/foto", autenticar, uploadProfile.single("imagem"), (req, res) => {
-  if (!req.file) return res.status(400).json({ erro: "Nenhuma imagem enviada" });
-  const fotoUrl = `http://localhost:3000/FTperfil/${req.file.filename}`;
-  db.query("UPDATE usuarios SET foto_url = ? WHERE id = ?", [fotoUrl, req.userId], (err) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    res.json({ msg: "Foto de perfil atualizada", foto_url: fotoUrl });
-  });
-});
+app.post(
+  "/usuarios/foto",
+  autenticar,
+  uploadProfile.single("imagem"),
+  (req, res) => {
+    if (!req.file)
+      return res.status(400).json({ erro: "Nenhuma imagem enviada" });
+    const fotoUrl = `http://localhost:3000/FTperfil/${req.file.filename}`;
+    db.query(
+      "UPDATE usuarios SET foto_url = ? WHERE id = ?",
+      [fotoUrl, req.userId],
+      (err) => {
+        if (err) return res.status(500).json({ erro: err.message });
+        res.json({ msg: "Foto de perfil atualizada", foto_url: fotoUrl });
+      }
+    );
+  }
+);
+
+// -------------------- ROTAS DOS PRODUTOS -------------------- //
 
 // Criar produto
 app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
@@ -210,6 +269,146 @@ app.get("/produtos", (req, res) => {
   );
 });
 
+// Listar produtos do usuário logado
+app.get("/meuProdutos", autenticar, (req, res) => {
+  const userId = req.userId;
+
+  db.query(
+    `SELECT p.*, u.nome AS usuario_nome
+     FROM produtos p
+     JOIN usuarios u ON p.vendedor = u.id
+     WHERE p.vendedor = ?
+     ORDER BY p.data_publicacao DESC`,
+    [userId],
+    (err, results) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json(results);
+    }
+  );
+});
+
+// -------------------- Apagar produto -------------------- //
+// Apagar produto, apaga tudo relacionado a esse produto
+app.delete("/produtos/:id", autenticar, (req, res) => {
+  const prodId = parseInt(req.params.id);
+  console.log(
+    "DELETE /produtos/:id chamada com prodId:",
+    prodId,
+    "userId:",
+    req.userId
+  );
+
+  if (isNaN(prodId)) {
+    console.log("ID inválido");
+    return res.status(400).json({ erro: "ID inválido" });
+  }
+
+  //verifica se o produto existe e se o utilizador é o vendedor
+  db.query(
+    "SELECT vendedor, imagem_url FROM produtos WHERE id = ?",
+    [prodId],
+    (err, rows) => {
+      if (err) {
+        console.error("Erro ao buscar produto:", err);
+        return res
+          .status(500)
+          .json({ erro: "Erro ao buscar produto: " + err.message });
+      }
+
+      if (!rows || rows.length === 0) {
+        console.log("Produto não encontrado:", prodId);
+        return res.status(404).json({ erro: "Produto não encontrado" });
+      }
+
+      const produto = rows[0];
+      console.log(
+        "Produto encontrado. Vendedor:",
+        produto.vendedor,
+        "UserId:",
+        req.userId
+      );
+
+      if (produto.vendedor !== req.userId) {
+        console.log("Não autorizado");
+        return res
+          .status(403)
+          .json({ erro: "Não autorizado a apagar este produto" });
+      }
+
+      //Remover favoritos
+      db.query(
+        "DELETE FROM favoritos WHERE id_produto = ?",
+        [prodId],
+        (errFav) => {
+          if (errFav) {
+            console.error("Erro ao apagar favoritos:", errFav);
+            return res
+              .status(500)
+              .json({ erro: "Erro ao apagar favoritos: " + errFav.message });
+          }
+
+          // Remover mensagens
+          db.query(
+            "DELETE FROM mensagens WHERE produto_id = ?",
+            [prodId],
+            (errMsg) => {
+              if (errMsg) {
+                console.error("Erro ao apagar mensagens:", errMsg);
+                return res
+                  .status(500)
+                  .json({
+                    erro: "Erro ao apagar mensagens: " + errMsg.message,
+                  });
+              }
+
+              //  Apagar o produto
+              console.log("Apagando produto:", prodId);
+              db.query(
+                "DELETE FROM produtos WHERE id = ?",
+                [prodId],
+                (err2, result) => {
+                  if (err2) {
+                    console.error("Erro ao apagar produto:", err2);
+                    return res
+                      .status(500)
+                      .json({
+                        erro: "Erro ao apagar produto: " + err2.message,
+                      });
+                  }
+
+                  
+
+                  // apaga a imagem do produto tbm 
+                  if (produto.imagem_url) {
+                    console.log("Removendo imagem:", produto.imagem_url);
+                    const imgPath = produto.imagem_url.startsWith("/")
+                      ? produto.imagem_url.slice(1)
+                      : produto.imagem_url;
+                    const fullPath = path.join(__dirname, imgPath);
+                    fs.unlink(fullPath, (unlinkErr) => {
+                      if (unlinkErr) {
+                        console.warn(
+                          "Aviso - Não foi possível apagar a imagem:",
+                          unlinkErr.message
+                        );
+                      } else {
+                        console.log("Imagem apagada com sucesso");
+                      }
+                    });
+                  }
+
+                  return res.json({ msg: "Produto apagado com sucesso" });
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+
 // -------------------- FAVORITOS -------------------- //
 
 // Adicionar produto aos favoritos
@@ -217,51 +416,74 @@ app.post("/favoritos", autenticar, (req, res) => {
   const userId = req.userId;
   const { id_produto } = req.body;
 
-  if (!id_produto) return res.status(400).json({ erro: "ID do produto é obrigatório" });
+  if (!id_produto)
+    return res.status(400).json({ erro: "ID do produto é obrigatório" });
 
   // Verificar se produto existe
-  db.query("SELECT id FROM produtos WHERE id = ?", [id_produto], (err, rows) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    if (rows.length === 0) return res.status(404).json({ erro: "Produto não encontrado" });
+  db.query(
+    "SELECT id FROM produtos WHERE id = ?",
+    [id_produto],
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      if (rows.length === 0)
+        return res.status(404).json({ erro: "Produto não encontrado" });
 
-    // Verificar se já está favoritado
-    db.query(
-      "SELECT * FROM favoritos WHERE id_produto = ? AND id_usuario = ?",
-      [id_produto, userId],
-      (err2, exists) => {
-        if (err2) return res.status(500).json({ erro: err2.message });
-        if (exists.length > 0) return res.status(400).json({ erro: "Produto já está nos favoritos" });
+      // Verificar se já está favoritado
+      db.query(
+        "SELECT * FROM favoritos WHERE id_produto = ? AND id_usuario = ?",
+        [id_produto, userId],
+        (err2, exists) => {
+          if (err2) return res.status(500).json({ erro: err2.message });
+          if (exists.length > 0)
+            return res
+              .status(400)
+              .json({ erro: "Produto já está nos favoritos" });
 
-        // Inserir nos favoritos
-        db.query("INSERT INTO favoritos (id_produto, id_usuario) VALUES (?, ?)", [id_produto, userId], (err3) => {
-          if (err3) return res.status(500).json({ erro: err3.message });
-          res.json({ msg: "Produto adicionado aos favoritos!" });
-        });
-      }
-    );
-  });
+          // guarda nos favoritos
+          db.query(
+            "INSERT INTO favoritos (id_produto, id_usuario) VALUES (?, ?)",
+            [id_produto, userId],
+            (err3) => {
+              if (err3) return res.status(500).json({ erro: err3.message });
+              res.json({ msg: "Produto adicionado aos favoritos!" });
+            }
+          );
+        }
+      );
+    }
+  );
 });
 
 // Remover produto dos favoritos
 app.delete("/favoritos/:id_produto", autenticar, (req, res) => {
   const userId = req.userId;
   const id_produto = parseInt(req.params.id_produto);
-  if (isNaN(id_produto)) return res.status(400).json({ erro: "ID de produto inválido" });
+  if (isNaN(id_produto))
+    return res.status(400).json({ erro: "ID de produto inválido" });
 
-  db.query("DELETE FROM favoritos WHERE id_produto = ? AND id_usuario = ?", [id_produto, userId], (err, result) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ erro: "Favorito não encontrado" });
-    res.json({ msg: "Produto removido dos favoritos!" });
-  });
+  db.query(
+    "DELETE FROM favoritos WHERE id_produto = ? AND id_usuario = ?",
+    [id_produto, userId],
+    (err, result) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      if (result.affectedRows === 0)
+        return res.status(404).json({ erro: "Favorito não encontrado" });
+      res.json({ msg: "Produto removido dos favoritos!" });
+    }
+  );
 });
 
 // Listar favoritos do usuário
 app.get("/favoritos", autenticar, (req, res) => {
   const userId = req.userId;
-  db.query("SELECT id_produto FROM favoritos WHERE id_usuario = ?", [userId], (err, rows) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    res.json(rows.map(row => row.id_produto)); // Retorna apenas os IDs dos produtos
-  });
+  db.query(
+    "SELECT id_produto FROM favoritos WHERE id_usuario = ?",
+    [userId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json(rows.map((row) => row.id_produto)); // Retorna apenas os IDs dos produtos
+    }
+  );
 });
 
 // -------------------- MENSAGENS -------------------- //
@@ -310,32 +532,45 @@ app.post("/mensagens", autenticar, (req, res) => {
   let { destinatario_id, texto, produto_id } = req.body;
 
   if (!destinatario_id || !texto || texto.trim() === "")
-    return res.status(400).json({ erro: "destinatario_id e texto são obrigatórios" });
+    return res
+      .status(400)
+      .json({ erro: "destinatario_id e texto são obrigatórios" });
 
   destinatario_id = Number(destinatario_id);
   produto_id = produto_id ? Number(produto_id) : null;
 
   // Verificar se destinatário existe
-  db.query("SELECT id FROM usuarios WHERE id = ?", [destinatario_id], (err, rows) => {
-    if (err) return res.status(500).json({ erro: err.message });
-    if (!rows || rows.length === 0) return res.status(400).json({ erro: "Destinatário não encontrado" });
+  db.query(
+    "SELECT id FROM usuarios WHERE id = ?",
+    [destinatario_id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      if (!rows || rows.length === 0)
+        return res.status(400).json({ erro: "Destinatário não encontrado" });
 
-    // Inserir mensagem
-    db.query(
-      "INSERT INTO mensagens (remetente_id, destinatario_id, produto_id, mensagem) VALUES (?,?,?,?)",
-      [remetente, destinatario_id, produto_id, texto],
-      (err2, result) => {
-        if (err2) return res.status(500).json({ erro: err2.message });
+      // Inserir mensagem
+      db.query(
+        "INSERT INTO mensagens (remetente_id, destinatario_id, produto_id, mensagem) VALUES (?,?,?,?)",
+        [remetente, destinatario_id, produto_id, texto],
+        (err2, result) => {
+          if (err2) return res.status(500).json({ erro: err2.message });
 
-        // Retornar a mensagem criada
-        db.query("SELECT * FROM mensagens WHERE id=?", [result.insertId], (err3, row) => {
-          if (err3) return res.status(500).json({ erro: err3.message });
-          res.json(row[0]);
-        });
-      }
-    );
-  });
+          // Retornar a mensagem criada
+          db.query(
+            "SELECT * FROM mensagens WHERE id=?",
+            [result.insertId],
+            (err3, row) => {
+              if (err3) return res.status(500).json({ erro: err3.message });
+              res.json(row[0]);
+            }
+          );
+        }
+      );
+    }
+  );
 });
 
-// -------------------- INICIAR SERVIDOR -------------------- //
-app.listen(3000, () => console.log("Servidor rodando em http://localhost:3000"));
+// -------------------- SERVIDOR -------------------- //
+app.listen(3000, () =>
+  console.log("Servidor rodando em http://localhost:3000")
+);

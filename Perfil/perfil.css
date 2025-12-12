@@ -229,7 +229,7 @@ h1 {
   min-height: 80px;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   resize: vertical;
   font-family: inherit;
 }
@@ -263,6 +263,20 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.apagarConta button a {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.apagarConta button a:hover {
+  border-radius: 100%;
+  transform: scale(1.8);
 }
 
 /* alerta  */
