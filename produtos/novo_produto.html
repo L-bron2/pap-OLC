@@ -1,42 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>novo-produto</title>
-  <link rel="stylesheet" href="produto.css">
-  <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
-<body>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Novo Produto</title>
 
-  <div class="conteiner">
-    <nav>
-      <a href="../inicio/inicio.html" class="logo">Trovix</a>
+    <link rel="stylesheet" href="produto.css" />
+    <link rel="icon" href="../favicon/Favicon final.png" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+  <body>
+    <div class="conteiner">
+      <nav>
+        <a href="../inicio/inicio.html" class="logo">Trovix</a>
         <ul class="navbar-links">
-          <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
-          <li><a href="../conversas/chat.html"><span class="material-symbols-outlined">chat</span></a></li>
-          <li><a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a></li>
-          <li><a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a></li>
+          <li>
+            <a href="../inicio/inicio.html"
+              ><span class="material-symbols-outlined">home</span></a
+            >
+          </li>
+          <li>
+            <a href="../conversas/chat.html"
+              ><span class="material-symbols-outlined">chat</span></a
+            >
+          </li>
+          <li>
+            <a href="../favoritos/favoritos.html"
+              ><span class="material-symbols-outlined">favorite</span></a
+            >
+          </li>
+          <li>
+            <a href="../Perfil/perfil.html"
+              ><span class="material-symbols-outlined">account_circle</span></a
+            >
+          </li>
         </ul>
-    </nav>
-      
-  <div class="adicionarProdutos">
-    <h1>Novo produto</h1>
-    <form id="formProduto">
-      <input type="text" id="titulo" class="input" placeholder="Título do produto" required />
-        <input type="text" id="descricao" class="textarea" placeholder="Descrição do produto"/>
-        <input type="number" step="0.01" id="preco" class="input" placeholder="Preço do produto" required />
-        <input type="text" id="categoria" class="input" placeholder="Categoria do produto"/>
-        <input type="file" id="imagem" name="imagem" class="input" accept="image/*" required />
-        <button type="submit" class="BTN">Adicionar produto</button>
-    </form>
-   </div>
+      </nav>
 
-   <div class="alerta" id="alerta" style="display: none;"></div>
-   <a href="../inicio/inicio.html" class="BTN_voltar">&#8592;</a>
-  </div>
+      <div class="adicionarProdutos">
+        <h1>Novo produto</h1>
 
-  <script src="produto.js"></script>
-</body>
+        <form id="formProduto">
+          <input
+            type="text"
+            id="titulo"
+            class="input"
+            placeholder="Título do produto"
+            required
+          />
+          <textarea
+            id="descricao"
+            class="textarea"
+            placeholder="Descrição do produto"
+          ></textarea>
+          <input
+            type="number"
+            step="0.01"
+            id="preco"
+            class="input"
+            placeholder="Preço do produto"
+            required
+          />
+
+          <select class="categoriaSelect input" id="categoriaSelect" required>
+            <option value="">Selecione uma categoria</option>
+          </select>
+
+          <input
+            type="file"
+            id="imagem"
+            class="input"
+            accept="image/*"
+            required
+          />
+          <button type="submit" class="BTN">Adicionar produto</button>
+        </form>
+      </div>
+
+      <div class="alerta" id="alerta" style="display: none"></div>
+      <a href="../inicio/inicio.html" class="BTN_voltar">&#8592;</a>
+    </div>
+
+    <script src="../shared/alerts.js"></script>
+    <script src="produto.js"></script>
+  </body>
 </html>

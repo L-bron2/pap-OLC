@@ -115,8 +115,10 @@ ul.navbar-links li a:hover::after {
   display: flex;
   gap: 18px;
   max-width: 1100px;
-  margin: 24px auto;
-  padding: 0 16px;
+  margin: 12px auto;
+  padding: 0 12px;
+  /* ocupar a maior parte da altura disponível para evitar scroll na janela inteira */
+  height: calc(100vh - 120px);
 }
 .conversas-lista {
   width: 300px;
@@ -124,6 +126,10 @@ ul.navbar-links li a:hover::after {
   border-radius: 10px;
   padding: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  /* garantir que a lista ocupe toda a altura do container pai */
+  height: 100%;
 }
 .conversas-header h3 {
   margin: 0 0 8px 0;
@@ -133,7 +139,8 @@ ul.navbar-links li a:hover::after {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 72vh;
+  /* usar flex para preencher o espaço disponível e permitir scroll interno apenas na lista */
+  flex: 1 1 auto;
   overflow: auto;
 }
 .conversa-item {
@@ -143,6 +150,8 @@ ul.navbar-links li a:hover::after {
   display: flex;
   gap: 8px;
   align-items: center;
+  position: relative;
+  padding-left: 46px; /* espaço para o botão à esquerda */
 }
 .conversa-item:hover {
   background: #f6f6f8;
@@ -163,13 +172,15 @@ ul.navbar-links li a:hover::after {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 60vh;
+  /* permitir que a área de chat ocupe a altura restante do chat-wrap */
+  height: 100%;
 }
 .chat-header {
   background: #fff;
   padding: 12px;
   border-radius: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -179,7 +190,8 @@ ul.navbar-links li a:hover::after {
   margin-top: 12px;
   padding: 16px;
   border-radius: 10px;
-  height: 56vh;
+  /* usar flex para ocupar o espaço disponível e evitar scroll na janela inteira */
+  flex: 1 1 auto;
   overflow: auto;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
@@ -234,9 +246,81 @@ ul.navbar-links li a:hover::after {
   z-index: 20;
 }
 
+/* botão de apagar que aparece em frente ao nome (lado esquerdo) */
+.apagar-btn {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #e74c3c;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+}
+
+.apagar-btn:hover {
+  transform: translateY(-50%) scale(1.06);
+  background: #d7322a;
+}
+
+.conversa-item .meta {
+  /* garantir conteúdo não fique por baixo do botão */
+  margin-left: 6px;
+}
+
+/* preview do produto no topo da área de chat */
+.produto-preview {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+}
+.produto-preview .preview-imagem img {
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.produto-preview .preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.produto-preview .preview-titulo {
+  font-weight: 700;
+  color: var(--cor-roxo);
+  font-size: 14px;
+  line-height: 1.1;
+}
+.produto-preview .preview-preco {
+  color: var(--cor-verde);
+  font-weight: 800;
+  font-size: 13px;
+}
+.produto-preview .preview-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+}
+
 /* botão estilo clean */
 .apagar-conversa button {
-  background: #ffffff;
+  background: #960101;
   border: none;
   padding: 6px;
   border-radius: 50%;
@@ -254,17 +338,16 @@ ul.navbar-links li a:hover::after {
   transform: scale(1.1);
 }
 
-.apagar-conversa button:hover .material-symbols-outlined {
-  color: white;
+.apagar-conversa button:hover {
+  color: black;
 }
 
 /* ícone */
-.apagar-conversa .material-symbols-outlined {
+.apagar-conversa {
   font-size: 20px;
   color: #444;
   transition: color 0.2s ease;
 }
-
 
 /* Alerta */
 .alerta {

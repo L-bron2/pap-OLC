@@ -1,20 +1,4 @@
-//função para alertas
-function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
-  const alerta = document.getElementById("alerta");
-  alerta.innerHTML = `
-    <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
-    ${mensagem}
-    <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
-  `;
-  alerta.style.background = cor;
-  alerta.classList.add("mostrar");
-  alerta.style.display = "block";
-
-  setTimeout(() => {
-    alerta.classList.remove("mostrar");
-    alerta.style.display = "none";
-  }, 3000);
-}
+// shared mostrarAlerta provided by ../shared/alerts.js
 
 //verificar utilizador
 document

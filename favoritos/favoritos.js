@@ -1,16 +1,3 @@
-function mostrarAlerta(mensagem, cor = "#ff3b30") {
-  const alerta = document.getElementById("alerta");
-  alerta.textContent = mensagem;
-  alerta.style.background = cor;
-  alerta.classList.add("mostrar");
-  alerta.style.display = "block";
-
-  setTimeout(() => {
-    alerta.classList.remove("mostrar");
-    alerta.style.display = "none";
-  }, 3000);
-}
-
 window.onload = async function () {
   const token = localStorage.getItem("token");
   const favoritosContainer = document.getElementById("favoritos-container");
@@ -58,10 +45,10 @@ window.onload = async function () {
     const todos = await resProdutos.json();
 
     // transformar ids para número
-    const favoritoIdsNum = favoritoIds.map(id => Number(id));
+    const favoritoIdsNum = favoritoIds.map((id) => Number(id));
 
-    // filtrar apenas os que tão marcados como favoritos 
-    const produtosFav = todos.filter(p => favoritoIdsNum.includes(p.id));
+    // filtrar apenas os que tão marcados como favoritos
+    const produtosFav = todos.filter((p) => favoritoIdsNum.includes(p.id));
 
     if (produtosFav.length === 0) {
       favoritosContainer.innerHTML = `
@@ -78,7 +65,7 @@ window.onload = async function () {
     favoritosContainer.innerHTML = "";
 
     // cards dos favoritos
-    produtosFav.forEach(produto => {
+    produtosFav.forEach((produto) => {
       const card = document.createElement("div");
       card.className = "favorito-card";
 
@@ -96,12 +83,14 @@ window.onload = async function () {
             <strong>Vendedor:</strong> ${produto.usuario_nome || "Desconhecido"}
           </p>
           <div class="favorito-acoes">
-            <button class="btn-remover" data-id="${produto.id}">Remover dos Favoritos</button>
+            <button class="btn-remover" data-id="${
+              produto.id
+            }">Remover dos Favoritos</button>
           </div>
         </div>
       `;
 
-      // abrir modal ao clicar no card 
+      // abrir modal ao clicar no card
       card.addEventListener("click", (e) => {
         if (e.target.classList.contains("btn-remover")) return;
 
@@ -109,14 +98,22 @@ window.onload = async function () {
 
         modalNome.textContent = produto.titulo;
         modalDescricao.textContent = produto.descricao;
-        modalVendedor.textContent = `Vendedor: ${produto.usuario_nome || "Vendedor"}`;
-        modalImagem.src = produto.imagem_url ? `http://localhost:3000${produto.imagem_url}` : "";
-        modalPreco.textContent = produto.preco ? `Preço: ${produto.preco}€` : "";
+        modalVendedor.textContent = `Vendedor: ${
+          produto.usuario_nome || "Vendedor"
+        }`;
+        modalImagem.src = produto.imagem_url
+          ? `http://localhost:3000${produto.imagem_url}`
+          : "";
+        modalPreco.textContent = produto.preco
+          ? `Preço: ${produto.preco}€`
+          : "";
 
         const vendedorId = produto.vendedor;
 
         modalBTN.onclick = () => {
-          const url = `../conversas/chat.html?vendedor=${vendedorId}&produto=${produto.id}&nome=${encodeURIComponent(produto.usuario_nome || "Vendedor")}`;
+          const url = `../conversas/chat.html?vendedor=${vendedorId}&produto=${
+            produto.id
+          }&nome=${encodeURIComponent(produto.usuario_nome || "Vendedor")}`;
           window.location.href = url;
         };
       });
@@ -127,13 +124,16 @@ window.onload = async function () {
         const idProduto = Number(e.target.dataset.id);
 
         try {
-          const res = await fetch(`http://localhost:3000/favoritos/${idProduto}`, {
-            method: "DELETE",
-            headers: {
-              "Authorization": "Bearer " + token,
-              "Content-Type": "application/json",
-            },
-          });
+          const res = await fetch(
+            `http://localhost:3000/favoritos/${idProduto}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
           if (!res.ok) throw new Error("Erro ao remover favorito");
 
@@ -162,7 +162,6 @@ window.onload = async function () {
 
     // Fechar modal
     fechar.onclick = () => (modal.style.display = "none");
-
   } catch (err) {
     mostrarAlerta(err.message, "#ff3b30");
     console.error(err);

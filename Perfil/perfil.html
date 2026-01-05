@@ -1,47 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Perfil</title>
-    <link rel="stylesheet" href="perfil.css">
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
-<body>
-    
+    <link rel="stylesheet" href="perfil.css" />
+    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+  <body>
     <div class="main">
-        <nav>
-            <a href="../inicio/inicio.html  " class="logo">Trovix</a>
-            <ul class="navbar-links">
-              <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
-              <li><a href="../conversas/chat.html"><span class="material-symbols-outlined">chat</span></a></li>
-              <li><a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a></li>
-              <li><a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a></li>
-            </ul>
-        </nav>
+      <nav>
+        <a href="../inicio/inicio.html  " class="logo">Trovix</a>
+        <ul class="navbar-links">
+          <li>
+            <a href="../inicio/inicio.html"
+              ><span class="material-symbols-outlined">home</span></a
+            >
+          </li>
+          <li>
+            <a href="../conversas/chat.html"
+              ><span class="material-symbols-outlined">chat</span></a
+            >
+          </li>
+          <li>
+            <a href="../favoritos/favoritos.html"
+              ><span class="material-symbols-outlined">favorite</span></a
+            >
+          </li>
+          <li>
+            <a href="../Perfil/perfil.html"
+              ><span class="material-symbols-outlined">account_circle</span></a
+            >
+          </li>
+        </ul>
+      </nav>
 
-        <h1>Perfil</h1>
-        <div class="profile-container">
-            <div class="profile-grid">
-                <div class="profile-card" id="profileCard">
-                    <span class="material-symbols-outlined">edit</span>
-                </div>
-                <div class="profile-details">
-                    <div id="usuarios" class="usuarios"></div>
-                    <div class="infoUtilizador"></div>
-                </div>
-            </div>
+      <h1>Perfil</h1>
+      <div class="profile-container">
+        <div class="profile-grid">
+          <div class="profile-card" id="profileCard">
+            <span class="material-symbols-outlined">edit</span>
+          </div>
+          <div class="profile-details">
+            <div id="usuarios" class="usuarios"></div>
+            <div class="infoUtilizador"></div>
+          </div>
         </div>
+      </div>
 
-        <div class="apagarConta" id="apagarConta"> 
-            <button id="apagarConta"><a href="#"><span class="material-symbols-outlined">delete</span></a></button>
+      <div class="apagarConta" id="apagarConta">
+        <button id="apagarConta">
+          <a href="#"><span class="material-symbols-outlined">delete</span></a>
+        </button>
+      </div>
+
+      <footer>
+        <div class="rodape">
+          <p>
+            &copy; O objetivo do projeto é permitir que pessoas que procuram
+            vender coisas que, pro exemplo, têm a mais em casa possam fazê-lo de
+            forma muito mais fácil e segura, já que as entregas são realizadas
+            pelas mesmas, em mãos..
+          </p>
+          <br />
+          <p>Desenvolvido por: <strong>Erlander Nobre</strong></p>
+          <br />
+          <p>Contacto: <strong>71898@aepap.edu.pt</strong></p>
         </div>
+      </footer>
 
-        <!-- alerta -->
-        <div class="alerta" id="alerta" style="display:none">Alerta</div>
+      <!-- alerta -->
+      <div class="alerta" id="alerta" style="display: none">Alerta</div>
     </div>
-
+    <script src="../shared/alerts.js"></script>
     <script src="perfil.js"></script>
-</body>
+  </body>
 </html>

@@ -1,56 +1,89 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Favoritos</title>
-    <link rel="stylesheet" href="favoritos.css">
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
-<body>
+    <link rel="stylesheet" href="favoritos.css" />
+    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+  <body>
     <div class="main">
-        <nav>
-            <a href="../inicio/inicio.html" class="logo">Trovix</a>
-            <div class="navbar-links">
-                <ul class="navbar-links">
-                    <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
-                    <li><a href="../conversas/chat.html"><span class="material-symbols-outlined">chat</span></a></li>
-                    <li><a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a></li>
-                    <li><a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- modal da caixa flutuante -->
-        <div id="caixaFlutuante" class="caixaFlutuante" style="display: none">
-            <div class="detalhes">
-                <span id="fechar" class="fechar">&times;</span>
-                <div class="modal-body">
-                    <div class="modal-image-wrap"><img id="modalImagem" class="modal-img" src="" alt="Imagem do produto"/></div>
-                    
-                    <div class="modal-content">
-                        <h2 id="nome"></h2>
-                        <p id="Preco" class="modal-preco"></p>
-                        <p id="descricao"></p>
-                        <p id="vendedor"></p>
-                        <div class="modal-actions"><button id="BTN" class="BTN">Enviar mensagem ao vendedor</button></div>
-                    </div>
-                </div>
-            </div>
+      <nav>
+        <a href="../inicio/inicio.html" class="logo">Trovix</a>
+        <div class="navbar-links">
+          <ul class="navbar-links">
+            <li>
+              <a href="../inicio/inicio.html"
+                ><span class="material-symbols-outlined">home</span></a
+              >
+            </li>
+            <li>
+              <a href="../conversas/chat.html"
+                ><span class="material-symbols-outlined">chat</span></a
+              >
+            </li>
+            <li>
+              <a href="../favoritos/favoritos.html"
+                ><span class="material-symbols-outlined">favorite</span></a
+              >
+            </li>
+            <li>
+              <a href="../Perfil/perfil.html"
+                ><span class="material-symbols-outlined"
+                  >account_circle</span
+                ></a
+              >
+            </li>
+          </ul>
         </div>
+      </nav>
 
-        <!-- cards dos favoritos -->
-        <div class="container">
-            <h1>Meus Favoritos</h1>
-            <div id="favoritos-container" class="favoritos-grid"></div>
+      <!-- modal da caixa flutuante -->
+      <div id="caixaFlutuante" class="caixaFlutuante" style="display: none">
+        <div class="detalhes">
+          <span id="fechar" class="fechar">&times;</span>
+          <div class="modal-body">
+            <div class="modal-image-wrap">
+              <img
+                id="modalImagem"
+                class="modal-img"
+                src=""
+                alt="Imagem do produto"
+              />
+            </div>
+
+            <div class="modal-content">
+              <h2 id="nome"></h2>
+              <p id="Preco" class="modal-preco"></p>
+              <p id="descricao"></p>
+              <p id="vendedor"></p>
+              <div class="modal-actions">
+                <button id="BTN" class="BTN">
+                  Enviar mensagem ao vendedor
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- alerta -->
-        <div class="alerta" id="alerta" style="display: none;">Alerta</div>
+      <!-- cards dos favoritos -->
+      <div class="container">
+        <h1>Meus Favoritos</h1>
+        <div id="favoritos-container" class="favoritos-grid"></div>
+      </div>
+
+      <!-- alerta -->
+      <div class="alerta" id="alerta" style="display: none">Alerta</div>
     </div>
 
     <script src="../config.js"></script>
+    <script src="../shared/alerts.js"></script>
     <script src="favoritos.js"></script>
-</body>
+  </body>
 </html>

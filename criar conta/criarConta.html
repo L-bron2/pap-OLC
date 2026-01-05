@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="CriarConta.css" />
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
+    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
     <title>Criar conta</title>
   </head>
   <body>
@@ -20,24 +20,41 @@
         <h1>Criar conta</h1>
         <!-- Formulário para criação de conta -->
         <form id="DadosConta">
-            <input type="text" id="nome" class="input" placeholder="Nome" required />
-            <input type="email" id="email" class="input" placeholder="Ex: meuemail@gmail.com" required />
-            <input type="password" id="senha" class="input" placeholder="Palavra passe" required />
-            <a href="../Login/login.html">Já tem uma conta? Faça login!</a>
-            <button type="submit" class="BTN">Criar conta</button>
+          <input
+            type="text"
+            id="nome"
+            class="input"
+            placeholder="Nome"
+            required
+          />
+          <input
+            type="email"
+            id="email"
+            class="input"
+            placeholder="Ex: meuemail@gmail.com"
+            required
+          />
+          <input
+            type="password"
+            id="senha"
+            class="input"
+            placeholder="Palavra passe"
+            required
+          />
+          <a href="../Login/login.html">Já tem uma conta? Faça login!</a>
+          <button type="submit" class="BTN">Criar conta</button>
         </form>
       </div>
 
       <!-- Botão de voltar -->
-      <a href="../Login/login.html" class="BTN_voltar">
-        &#8592;
-      </a>
+      <a href="../Login/login.html" class="BTN_voltar"> &#8592; </a>
 
       <!-- alerta -->
-      <div id="alerta" class="alerta" style="display: none;"></div>
+      <div id="alerta" class="alerta" style="display: none"></div>
     </div>
 
     <script src="../config.js"></script>
+    <script src="../shared/alerts.js"></script>
     <script src="criarConta.js"></script>
   </body>
 </html>

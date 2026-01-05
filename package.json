@@ -17,5 +17,8 @@
     "multer": "^2.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }

@@ -1,23 +1,5 @@
 const token = localStorage.getItem("token");
 
-function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
-  const alerta = document.getElementById("alerta");
-  if (!alerta) return;
-  alerta.innerHTML = `
-        <span style="font-size:1.3em;margin-right:8px;">${icone}</span>
-        ${mensagem}
-        <button class="fechar" onclick="this.parentElement.style.display='none'">&times;</button>
-    `;
-  alerta.style.background = cor;
-  alerta.classList.add("mostrar");
-  alerta.style.display = "block";
-
-  setTimeout(() => {
-    alerta.classList.remove("mostrar");
-    alerta.style.display = "none";
-  }, 3000);
-}
-
 // Verificar se existe token
 if (localStorage.getItem("token") === null) {
   window.location.href = "../Login/login.html";
@@ -184,10 +166,7 @@ async function carregarPerfil() {
                       "Texto recebido:",
                       texto
                     );
-                    mostrarAlerta(
-                      "resposta inválida do servidor",
-                      "#ff3b30"
-                    );
+                    mostrarAlerta("resposta inválida do servidor", "#ff3b30");
                     return;
                   }
 

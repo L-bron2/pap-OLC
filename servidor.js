@@ -243,6 +243,9 @@ app.post(
 
 // Criar produto
 app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
+  const token = req.headers["authorization"];
+  if (!token) return res.status(403).json({ erro: "Token não fornecido" });
+  if (token.startsWith("Bearer ")) token = token.slice(7);
   const { titulo, descricao, preco, categoria } = req.body;
   const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
   db.query(
@@ -255,13 +258,41 @@ app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   );
 });
 
+// categorias disponíveis
+app.get("/categorias", (req, res) => {
+  db.query("SELECT DISTINCT categoria FROM produtos", (err, rows) => {
+    if (err) {
+      console.error("Erro ao buscar categorias:", err.message);
+      return res.status(500).json({ erro: "Erro ao buscar categorias" });
+    }
+    res.json(rows);
+  });
+});
+
 // Listar produtos
 app.get("/produtos", (req, res) => {
   db.query(
-    `SELECT p.*, u.nome AS usuario_nome 
+    `SELECT p.*, u.nome AS usuario_nome
      FROM produtos p
      JOIN usuarios u ON p.vendedor = u.id
      ORDER BY p.data_publicacao DESC`,
+    (err, results) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json(results);
+    }
+  );
+});
+
+//filtro de produtos por categoria
+app.get("/produtos/categoria/:categoria", (req, res) => {
+  const categoria = req.params.categoria;
+  db.query(
+    `SELECT p.*, u.nome AS usuario_nome
+      FROM produtos p
+      JOIN usuarios u ON p.vendedor = u.id
+      WHERE p.categoria = ?
+      ORDER BY p.data_publicacao DESC`,
+    [categoria],
     (err, results) => {
       if (err) return res.status(500).json({ erro: err.message });
       res.json(results);
@@ -354,11 +385,9 @@ app.delete("/produtos/:id", autenticar, (req, res) => {
             (errMsg) => {
               if (errMsg) {
                 console.error("Erro ao apagar mensagens:", errMsg);
-                return res
-                  .status(500)
-                  .json({
-                    erro: "Erro ao apagar mensagens: " + errMsg.message,
-                  });
+                return res.status(500).json({
+                  erro: "Erro ao apagar mensagens: " + errMsg.message,
+                });
               }
 
               //  Apagar o produto
@@ -369,16 +398,12 @@ app.delete("/produtos/:id", autenticar, (req, res) => {
                 (err2, result) => {
                   if (err2) {
                     console.error("Erro ao apagar produto:", err2);
-                    return res
-                      .status(500)
-                      .json({
-                        erro: "Erro ao apagar produto: " + err2.message,
-                      });
+                    return res.status(500).json({
+                      erro: "Erro ao apagar produto: " + err2.message,
+                    });
                   }
 
-                  
-
-                  // apaga a imagem do produto tbm 
+                  // apaga a imagem do produto tbm
                   if (produto.imagem_url) {
                     console.log("Removendo imagem:", produto.imagem_url);
                     const imgPath = produto.imagem_url.startsWith("/")
@@ -407,7 +432,6 @@ app.delete("/produtos/:id", autenticar, (req, res) => {
     }
   );
 });
-
 
 // -------------------- FAVORITOS -------------------- //
 
@@ -526,46 +550,103 @@ app.get("/mensagens/conversa/:outro", autenticar, (req, res) => {
   );
 });
 
-// Enviar mensagem
 app.post("/mensagens", autenticar, (req, res) => {
-  const remetente = req.userId;
+  const remetente_id = req.userId;
   let { destinatario_id, texto, produto_id } = req.body;
 
-  if (!destinatario_id || !texto || texto.trim() === "")
-    return res
-      .status(400)
-      .json({ erro: "destinatario_id e texto são obrigatórios" });
+  if (!destinatario_id || !texto || texto.trim() === "") {
+    return res.status(400).json({
+      erro: "destinatario_id e texto são obrigatórios",
+    });
+  }
 
   destinatario_id = Number(destinatario_id);
   produto_id = produto_id ? Number(produto_id) : null;
 
-  // Verificar se destinatário existe
+  // Verificar destinatário
   db.query(
     "SELECT id FROM usuarios WHERE id = ?",
     [destinatario_id],
     (err, rows) => {
       if (err) return res.status(500).json({ erro: err.message });
-      if (!rows || rows.length === 0)
+      if (!rows.length)
         return res.status(400).json({ erro: "Destinatário não encontrado" });
 
       // Inserir mensagem
       db.query(
-        "INSERT INTO mensagens (remetente_id, destinatario_id, produto_id, mensagem) VALUES (?,?,?,?)",
-        [remetente, destinatario_id, produto_id, texto],
+        `INSERT INTO mensagens 
+         (remetente_id, destinatario_id, produto_id, mensagem) 
+         VALUES (?,?,?,?)`,
+        [remetente_id, destinatario_id, produto_id, texto],
         (err2, result) => {
           if (err2) return res.status(500).json({ erro: err2.message });
 
-          // Retornar a mensagem criada
+          // Buscar mensagem + produto (se existir)
           db.query(
-            "SELECT * FROM mensagens WHERE id=?",
+            `
+            SELECT 
+              m.id,
+              m.mensagem,
+              m.data_envio,
+              m.remetente_id,
+              m.destinatario_id,
+              p.id AS produto_id,
+              p.titulo,
+              p.imagem_url,
+              p.preco,
+              u.nome AS vendedor_nome
+            FROM mensagens m
+            LEFT JOIN produtos p ON m.produto_id = p.id
+            LEFT JOIN usuarios u ON p.vendedor = u.id
+            WHERE m.id = ?
+            `,
             [result.insertId],
-            (err3, row) => {
+            (err3, rows3) => {
               if (err3) return res.status(500).json({ erro: err3.message });
-              res.json(row[0]);
+
+              res.json(rows3[0]);
             }
           );
         }
       );
+    }
+  );
+});
+
+// Apagar todas as mensagens entre o usuário autenticado e outro usuário
+app.delete("/mensagens/conversa/:outro", autenticar, (req, res) => {
+  const id = req.userId;
+  const outro = parseInt(req.params.outro);
+  console.log(
+    `DELETE /mensagens/conversa/${req.params.outro} called by userId=${id}`
+  );
+  if (isNaN(outro)) {
+    console.warn('Id "outro" inválido:', req.params.outro);
+    return res.status(400).json({ erro: "ID inválido" });
+  }
+
+  db.query(
+    "DELETE FROM mensagens WHERE (remetente_id = ? AND destinatario_id = ?) OR (remetente_id = ? AND destinatario_id = ?)",
+    [id, outro, outro, id],
+    (err, result) => {
+      if (err) {
+        console.error("Erro ao apagar conversa:", err.message);
+        return res.status(500).json({ erro: err.message });
+      }
+      if (!result || result.affectedRows === 0) {
+        console.log(
+          "Nenhuma mensagem encontrada para apagar entre",
+          id,
+          "e",
+          outro
+        );
+        return res.status(404).json({ erro: "Conversa não encontrada" });
+      }
+      console.log("Mensagens apagadas:", result.affectedRows);
+      res.json({
+        msg: "Conversa apagada com sucesso",
+        deleted: result.affectedRows,
+      });
     }
   );
 });

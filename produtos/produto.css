@@ -105,7 +105,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-
 /* Container */
 .adicionarProdutos {
   background: var(--cor-cinza-muito-claro);
@@ -114,7 +113,7 @@ h1 {
   padding: 40px 30px;
   max-width: 450px;
   margin: 60px auto;
-  margin-top: 120px ;
+  margin-top: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,6 +143,43 @@ h1 {
   margin-bottom: 14px;
   background-color: var(--cor-cinza-claro);
   transition: all 0.2s ease;
+}
+
+/* Select de categorias estilo consistente com inputs */
+.adicionarProdutos select {
+  width: 100%;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  margin-bottom: 14px;
+  background-color: var(--cor-cinza-claro);
+  color: var(--cor-cinza-escuro);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--cor-cinza-medio) 50%
+    ),
+    linear-gradient(135deg, var(--cor-cinza-medio) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position: calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px), 100% 0;
+  background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+  background-repeat: no-repeat;
+  transition: all 0.2s ease;
+}
+
+.adicionarProdutos select:focus {
+  border-color: var(--cor-roxo);
+  background-color: #fff;
+  outline: none;
+}
+
+.adicionarProdutos select option[disabled] {
+  color: var(--cor-cinza-medio);
 }
 
 .adicionarProdutos .input:focus,
@@ -188,6 +224,38 @@ h1 {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
+/* Aperfeiçoamentos visuais */
+.adicionarProdutos textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.adicionarProdutos .BTN {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.adicionarProdutos .input[required],
+.adicionarProdutos select[required] {
+  box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.adicionarProdutos .input:focus,
+.adicionarProdutos select:focus,
+.adicionarProdutos .textarea:focus {
+  box-shadow: 0 6px 20px rgba(140, 76, 255, 0.08);
+}
+
+.adicionarProdutos input[type="file"].input {
+  padding: 10px 12px;
+}
+
+/* Ajuste para o botão quando estiver desabilitado (por exemplo, validação futura) */
+.adicionarProdutos .BTN:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Botão voltar*/
 .BTN_voltar {
   position: fixed;
@@ -212,7 +280,9 @@ h1 {
   background: var(--cor-roxo);
   transform: scale(1.1);
 }
-
+.categoriaSelect {
+  color: var(--cor-cinza-escuro);
+}
 
 /* Alerta */
 .alerta {
