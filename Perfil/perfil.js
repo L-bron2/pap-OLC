@@ -7,6 +7,9 @@ if (localStorage.getItem("token") === null) {
 
 // Carregar dados do utilizador
 async function carregarPerfil() {
+  const areaAdmin = document.getElementById("area_admin");
+  // admin visibility handled by shared/admin-link.js; do not inspect token string here
+
   try {
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;

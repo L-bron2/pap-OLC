@@ -64,9 +64,18 @@ function autenticar(req, res, next) {
   if (token.startsWith("Bearer ")) token = token.slice(7);
   jwt.verify(token, "segredo", (err, decoded) => {
     if (err) return res.status(401).json({ erro: "Token inválido" });
+    // armazenar id e role do token no request para uso posterior
     req.userId = decoded.id;
+    req.role = decoded.role; // 'user' ou 'admin'
     next();
   });
+}
+
+// Middleware simples para autorizar apenas administradores
+function autorizarAdmin(req, res, next) {
+  if (req.role !== "admin")
+    return res.status(403).json({ erro: "Área reservada para administradores" });
+  next();
 }
 
 // -------------------- ROTAS DE RECUPERAÇÃO DA PALAVRA PASSE-------------------- //
@@ -116,9 +125,10 @@ app.post("/usuarios", async (req, res) => {
   if (!nome || !email || !senha)
     return res.status(400).json({ erro: "Preencha todos os campos" });
   const hash = await bcrypt.hash(senha, 10);
+  // definir role padrão como 'user' ao criar conta
   db.query(
-    "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
-    [nome, email, hash],
+    "INSERT INTO usuarios (nome, email, senha, role) VALUES (?, ?, ?, ?)",
+    [nome, email, hash, "user"],
     (err) => {
       if (err) return res.status(500).json({ erro: err.message });
       res.json({ msg: "Conta criada com sucesso!" });
@@ -186,7 +196,10 @@ app.post("/login", (req, res) => {
       if (!match)
         return res.status(401).json({ erro: "Palavra passe incorreta" });
 
-      const token = jwt.sign({ id: user.id }, "segredo", { expiresIn: "1h" });
+      // incluir a role no token para permitir verificações de autorização
+      const token = jwt.sign({ id: user.id, role: user.role }, "segredo", {
+        expiresIn: "1h",
+      });
       res.json({ token });
     }
   );
@@ -194,13 +207,26 @@ app.post("/login", (req, res) => {
 
 // get do usuário logado
 app.get("/usuarios/id", autenticar, (req, res) => {
-  const sql = "SELECT id, nome, email, foto_url FROM usuarios WHERE id = ?";
+  // Retorna também a role para permitir verificações client-side (ex: página admin)
+  const sql =
+    "SELECT id, nome, email, foto_url, role FROM usuarios WHERE id = ?";
   db.query(sql, [req.userId], (err, results) => {
     if (err) return res.status(500).json({ erro: err.message });
     if (!results || results.length === 0)
       return res.status(404).json({ erro: "Usuário não encontrado" });
     res.json(results[0]);
   });
+});
+
+// Rota administrativa: listar todos os utilizadores (apenas admins)
+app.get("/usuarios", autenticar, autorizarAdmin, (req, res) => {
+  db.query(
+    "SELECT id, nome, email, role, foto_url FROM usuarios ORDER BY id ASC",
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json(rows);
+    }
+  );
 });
 
 // GET de um usuário específico pelo ID
@@ -215,6 +241,164 @@ app.get("/usuarios/:id", (req, res) => {
       if (!results || results.length === 0)
         return res.status(404).json({ erro: "Usuário não encontrado" });
       res.json(results[0]);
+    }
+  );
+});
+
+// Rota administrativa: apagar um utilizador pelo id (apaga produtos, favoritos, mensagens e imagem de perfil)
+// Apenas administradores podem executar esta ação
+app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (isNaN(targetId)) return res.status(400).json({ erro: "ID inválido" });
+
+  // 1) Buscar produtos do utilizador para poder remover imagens e dados relacionados
+  db.query(
+    "SELECT id, imagem_url FROM produtos WHERE vendedor = ?",
+    [targetId],
+    (err, produtos) => {
+      if (err) return res.status(500).json({ erro: err.message });
+
+      const prodIds = (produtos || []).map((p) => p.id);
+
+      // helper para converter URLs/paths em caminhos locais para unlink
+      function toLocalPath(url) {
+        if (!url) return null;
+        if (url.startsWith("/")) return url.slice(1);
+        try {
+          const parsed = new URL(url);
+          return parsed.pathname.startsWith("/")
+            ? parsed.pathname.slice(1)
+            : parsed.pathname;
+        } catch (e) {
+          // se não for uma URL válida, retornar como estava
+          return url;
+        }
+      }
+
+      // 2) Apagar favoritos associados aos produtos
+      const deleteFavsForProducts = (cb) => {
+        if (!prodIds.length) return cb();
+        db.query(
+          "DELETE FROM favoritos WHERE id_produto IN (?)",
+          [prodIds],
+          (err2) => {
+            if (err2) return res.status(500).json({ erro: err2.message });
+            cb();
+          }
+        );
+      };
+
+      deleteFavsForProducts(() => {
+        // 3) Apagar mensagens relacionadas a esses produtos
+        const deleteMsgsForProducts = (done) => {
+          if (!prodIds.length) return done();
+          db.query(
+            "DELETE FROM mensagens WHERE produto_id IN (?)",
+            [prodIds],
+            (err3) => {
+              if (err3) return res.status(500).json({ erro: err3.message });
+              done();
+            }
+          );
+        };
+
+        deleteMsgsForProducts(() => {
+          // 4) Apagar os produtos em si
+          db.query(
+            "DELETE FROM produtos WHERE vendedor = ?",
+            [targetId],
+            (err4) => {
+              if (err4) return res.status(500).json({ erro: err4.message });
+
+              // remover ficheiros de imagem dos produtos
+              produtos.forEach((p) => {
+                if (p.imagem_url) {
+                  const imgPath = toLocalPath(p.imagem_url);
+                  if (imgPath) {
+                    const full = path.join(__dirname, imgPath);
+                    fs.unlink(full, (unlinkErr) => {
+                      if (unlinkErr)
+                        console.warn(
+                          "Aviso - Não foi possível apagar imagem do produto:",
+                          unlinkErr.message
+                        );
+                    });
+                  }
+                }
+              });
+
+              // 5) Apagar favoritos do próprio utilizador
+              db.query(
+                "DELETE FROM favoritos WHERE id_usuario = ?",
+                [targetId],
+                (err5) => {
+                  if (err5) return res.status(500).json({ erro: err5.message });
+
+                  // 6) Apagar mensagens em que o utilizador é remetente ou destinatário
+                  db.query(
+                    "DELETE FROM mensagens WHERE remetente_id = ? OR destinatario_id = ?",
+                    [targetId, targetId],
+                    (err6) => {
+                      if (err6)
+                        return res.status(500).json({ erro: err6.message });
+
+                      // 7) Buscar foto de perfil para remover ficheiro
+                      db.query(
+                        "SELECT foto_url FROM usuarios WHERE id = ?",
+                        [targetId],
+                        (err7, rows7) => {
+                          if (err7)
+                            return res.status(500).json({ erro: err7.message });
+                          const foto =
+                            rows7 && rows7[0] ? rows7[0].foto_url : null;
+
+                          // 8) Apagar o utilizador
+                          db.query(
+                            "DELETE FROM usuarios WHERE id = ?",
+                            [targetId],
+                            (err8, result8) => {
+                              if (err8)
+                                return res
+                                  .status(500)
+                                  .json({ erro: err8.message });
+                              if (!result8 || result8.affectedRows === 0)
+                                return res
+                                  .status(404)
+                                  .json({ erro: "Usuário não encontrado" });
+
+                              // remover ficheiro de foto de perfil (se existir)
+                              if (foto) {
+                                const fotoPath = toLocalPath(foto);
+                                if (fotoPath) {
+                                  const fullFoto = path.join(
+                                    __dirname,
+                                    fotoPath
+                                  );
+                                  fs.unlink(fullFoto, (unlinkErr2) => {
+                                    if (unlinkErr2)
+                                      console.warn(
+                                        "Aviso - Não foi possível apagar foto do utilizador:",
+                                        unlinkErr2.message
+                                      );
+                                  });
+                                }
+                              }
+
+                              return res.json({
+                                msg: "Usuário apagado com sucesso",
+                              });
+                            }
+                          );
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+        });
+      });
     }
   );
 });
@@ -243,9 +427,7 @@ app.post(
 
 // Criar produto
 app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(403).json({ erro: "Token não fornecido" });
-  if (token.startsWith("Bearer ")) token = token.slice(7);
+  // token já validado pelo middleware `autenticar`; `req.userId` e `req.role` disponíveis
   const { titulo, descricao, preco, categoria } = req.body;
   const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
   db.query(
@@ -359,7 +541,8 @@ app.delete("/produtos/:id", autenticar, (req, res) => {
         req.userId
       );
 
-      if (produto.vendedor !== req.userId) {
+      // permitir que o vendedor apague seu produto OU que um admin apague qualquer produto
+      if (produto.vendedor !== req.userId && req.role !== "admin") {
         console.log("Não autorizado");
         return res
           .status(403)

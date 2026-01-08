@@ -5,6 +5,7 @@ function getQueryParam(param) {
 
 //verifica se o utilizador esta logado e se tiver pode enviar mensagens
 window.onload = async function () {
+  const areaAdmin = document.getElementById("area_admin");
   const token = localStorage.getItem("token");
   if (!token) {
     mostrarAlerta("Faça login para poder acessar a essa página!");
@@ -13,6 +14,7 @@ window.onload = async function () {
       1500
     );
   }
+  // admin visibility handled by shared/admin-link.js; do not inspect token string here
 
   const listaConversas = document.getElementById("listaConversas");
   const chatMensagens = document.getElementById("chatMensagens");

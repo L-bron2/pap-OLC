@@ -10,12 +10,15 @@ window.onload = async function () {
   const modalBTN = document.getElementById("BTN");
   const modalImagem = document.getElementById("modalImagem");
   const modalPreco = document.getElementById("Preco");
+  const areaAdmin = document.getElementById("area_admin");
 
   if (!token) {
     mostrarAlerta("Faça login para ver seus favoritos", "#ff3b30");
     setTimeout(() => (window.location.href = "../Login/login.html"), 1500);
     return;
   }
+
+  // visibility of admin area is handled by shared/admin-link.js
 
   try {
     // pega os favoritos

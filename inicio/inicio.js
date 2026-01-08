@@ -46,6 +46,7 @@ window.onload = async function () {
   const modalImagem = document.getElementById("modalImagem");
   const modalPreco = document.getElementById("Preco");
   const filtro = document.getElementById("filtro");
+  const areaAdmin = document.getElementById("area_admin");
 
   const token = localStorage.getItem("token");
   let favoritosList = [];
@@ -62,6 +63,8 @@ window.onload = async function () {
       mostrarAlerta("Erro ao carregar favoritos.", "#ff3b30");
     }
   }
+
+  // admin visibility handled by shared/admin-link.js; do not inspect token string here
 
   /* ================= PRODUTOS ================= */
   fetch("http://localhost:3000/produtos")
@@ -221,19 +224,18 @@ window.onload = async function () {
       });
 
       /* ================= FILTRO ================= */
-     /* ================= FILTRO (CORRIGIDO) ================= */
-  if (filtro) {
-    filtro.addEventListener("click", async () => {
-      modal.style.display = "flex";
+      if (filtro) {
+        filtro.addEventListener("click", async () => {
+          modal.style.display = "flex";
 
-      // 🔥 ESCONDE COMPLETAMENTE A IMAGEM NO MODAL DE FILTRO
-      modalImagem.style.display = "none";
-      modalImagem.src = "";
-      modalImagem.alt = "";
+          // 🔥 ESCONDE COMPLETAMENTE A IMAGEM NO MODAL DE FILTRO
+          modalImagem.style.display = "none";
+          modalImagem.src = "";
+          modalImagem.alt = "";
 
-      modalNome.textContent = "Filtrar Produtos";
+          modalNome.textContent = "Filtrar Produtos";
 
-      modalDescricao.innerHTML = `
+          modalDescricao.innerHTML = `
         <form class="filtro-form">
           <label for="categoriaFiltro">Categoria</label>
           <select id="categoriaFiltro"></select>
@@ -251,56 +253,56 @@ window.onload = async function () {
         </form>
       `;
 
-      modalVendedor.textContent = "";
-      modalPreco.textContent = "";
-      modalBTN.textContent = "Aplicar filtros";
+          modalVendedor.textContent = "";
+          modalPreco.textContent = "";
+          modalBTN.textContent = "Aplicar filtros";
 
-      await carregarCategorias("categoriaFiltro");
+          await carregarCategorias("categoriaFiltro");
 
-      modalBTN.onclick = () => {
-        const categoria = document.getElementById("categoriaFiltro").value;
-        const precoMinimo = parseFloat(
-          document.getElementById("precoMinimo").value
-        );
-        const precoMaximo = parseFloat(
-          document.getElementById("precoMaximo").value
-        );
+          modalBTN.onclick = () => {
+            const categoria = document.getElementById("categoriaFiltro").value;
+            const precoMinimo = parseFloat(
+              document.getElementById("precoMinimo").value
+            );
+            const precoMaximo = parseFloat(
+              document.getElementById("precoMaximo").value
+            );
 
-        const produtos = document.querySelectorAll(".produto");
+            const produtos = document.querySelectorAll(".produto");
 
-        produtos.forEach((produto) => {
-          const precoText = produto
-            .querySelector("p strong")
-            ?.parentElement.textContent;
-          const preco = precoText
-            ? parseFloat(precoText.replace(/[^\d,.]/g, "").replace(",", "."))
-            : NaN;
+            produtos.forEach((produto) => {
+              const precoText =
+                produto.querySelector("p strong")?.parentElement.textContent;
+              const preco = precoText
+                ? parseFloat(
+                    precoText.replace(/[^\d,.]/g, "").replace(",", ".")
+                  )
+                : NaN;
 
-          const categoriaText = produto
-            .querySelector("p:nth-of-type(3)")
-            ?.textContent;
+              const categoriaText =
+                produto.querySelector("p:nth-of-type(3)")?.textContent;
 
-          let mostrar = true;
+              let mostrar = true;
 
-          if (categoria && !categoriaText?.includes(categoria)) {
-            mostrar = false;
-          }
+              if (categoria && !categoriaText?.includes(categoria)) {
+                mostrar = false;
+              }
 
-          if (!isNaN(precoMinimo) && preco < precoMinimo) {
-            mostrar = false;
-          }
+              if (!isNaN(precoMinimo) && preco < precoMinimo) {
+                mostrar = false;
+              }
 
-          if (!isNaN(precoMaximo) && preco > precoMaximo) {
-            mostrar = false;
-          }
+              if (!isNaN(precoMaximo) && preco > precoMaximo) {
+                mostrar = false;
+              }
 
-          produto.style.display = mostrar ? "flex" : "none";
+              produto.style.display = mostrar ? "flex" : "none";
+            });
+
+            modal.style.display = "none";
+          };
         });
-
-        modal.style.display = "none";
-      };
-    });
-  }
+      }
     })
     .catch((err) => {
       console.error(err);
