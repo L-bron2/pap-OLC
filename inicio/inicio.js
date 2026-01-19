@@ -47,6 +47,237 @@ window.onload = async function () {
   const modalPreco = document.getElementById("Preco");
   const filtro = document.getElementById("filtro");
   const areaAdmin = document.getElementById("area_admin");
+  const nextPagebtn = document.getElementById("NextPage");
+
+  let allProducts = [];
+  let currentPage = 1;
+  const itemsPerPage = 12;
+
+  function renderProducts(page) {
+    produtosContainer.innerHTML = "";
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageProducts = allProducts.slice(start, end);
+
+    pageProducts.forEach((produto) => {
+      const div = document.createElement("div");
+      div.classList.add("produto");
+      div.style.position = "relative";
+
+      const isFav = favoritosList.includes(produto.id);
+
+      div.innerHTML = `
+        <button class="favoritoBTN" style="top:5px;right:8px;background:white;border:none;cursor:pointer;padding:5px;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:10;">
+          <span class="material-symbols-outlined" style="font-size:24px;color:${
+            isFav ? "#fa6db3" : "#999"
+          };">
+            ${isFav ? "favorite" : "favorite_border"}
+          </span>
+        </button>
+        <h3>${produto.titulo}</h3>
+        <img src="http://localhost:3000${produto.imagem_url || ""}" alt="${
+        produto.titulo
+      }">
+        <p>${produto.descricao}</p>
+        <p><strong>Preço:</strong> ${produto.preco}€</p>
+        <p><strong>Categoria:</strong> ${produto.categoria}</p>
+        <p><strong>Data:</strong> ${new Date(
+          produto.data_publicacao
+        ).toLocaleDateString()}</p>
+      `;
+
+      /* ========== handlers: favorito e abrir modal ========== */
+      const favoritoBTN = div.querySelector(".favoritoBTN");
+      const span = favoritoBTN ? favoritoBTN.querySelector("span") : null;
+
+      if (favoritoBTN) {
+        favoritoBTN.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!token) {
+            mostrarAlerta("Faça login para adicionar favoritos", "#ff3b30");
+            return;
+          }
+
+          const isFavorited = favoritosList.includes(produto.id);
+          const method = isFavorited ? "DELETE" : "POST";
+          const url = isFavorited
+            ? `http://localhost:3000/favoritos/${produto.id}`
+            : "http://localhost:3000/favoritos";
+
+          const options = {
+            method,
+            headers: { Authorization: "Bearer " + token },
+          };
+          if (method === "POST") {
+            options.headers["Content-Type"] = "application/json";
+            options.body = JSON.stringify({ id_produto: produto.id });
+          }
+
+          fetch(url, options)
+            .then((res) => res.json())
+            .then(() => {
+              if (!isFavorited) {
+                favoritosList.push(produto.id);
+                if (span) {
+                  span.textContent = "favorite";
+                  span.style.color = "#fa6db3";
+                }
+                mostrarAlerta(
+                  `${produto.titulo} adicionado aos favoritos!`,
+                  "#00cc66"
+                );
+              } else {
+                favoritosList = favoritosList.filter(
+                  (id) => id !== produto.id
+                );
+                if (span) {
+                  span.textContent = "favorite_border";
+                  span.style.color = "#999";
+                }
+                mostrarAlerta(
+                  `${produto.titulo} removido dos favoritos!`,
+                  "#ff9500"
+                );
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+              mostrarAlerta("Erro ao atualizar favorito", "#ff3b30");
+            });
+        });
+      }
+
+      div.addEventListener("click", (e) => {
+        if (e.target.closest(".favoritoBTN")) return; // previne abrir modal ao clicar no favorito
+
+        modal.style.display = "flex";
+        modalNome.textContent = produto.titulo || "";
+        modalDescricao.textContent = produto.descricao || "";
+        modalVendedor.textContent = `Vendedor: ${
+          produto.usuario_nome || "Vendedor"
+        }`;
+        modalImagem.src = produto.imagem_url
+          ? `http://localhost:3000${produto.imagem_url}`
+          : "";
+        modalImagem.alt = produto.titulo || "Imagem do produto";
+        modalPreco.textContent = produto.preco
+          ? `Preço: ${produto.preco}€`
+          : "";
+
+        const vendedorId = produto.vendedor;
+        if (!vendedorId) {
+          mostrarAlerta("Vendedor não encontrado", "#ff3b30");
+          return;
+        }
+
+        modalBTN.onclick = () => {
+          const produtoId = produto.id;
+          mostrarAlerta(
+            `Abrindo conversa com ${produto.usuario_nome || "Vendedor"}...`,
+            "#00cc66"
+          );
+          const tituloParam = encodeURIComponent(produto.titulo || "");
+          const precoParam = encodeURIComponent(produto.preco || "");
+          const imgUrl = produto.imagem_url
+            ? `http://localhost:3000${produto.imagem_url}`
+            : "";
+          const imgParam = encodeURIComponent(imgUrl);
+          const url = `../conversas/chat.html?vendedor=${encodeURIComponent(
+            vendedorId
+          )}&produto=${encodeURIComponent(
+            produtoId
+          )}&nome=${encodeURIComponent(
+            produto.usuario_nome || "Vendedor"
+          )}&titulo=${tituloParam}&preco=${precoParam}&img=${imgParam}`;
+          window.location.href = url;
+        };
+      });
+
+      produtosContainer.appendChild(div);
+    });
+  }
+
+  function renderPagination() {
+    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+    const pagesDiv = document.getElementById("Pages");
+    pagesDiv.innerHTML = "";
+
+    // prev button
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = '<span class="material-symbols-outlined">arrow_back</span>';
+    prevBtn.classList.add("page-btn");
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderProducts(currentPage);
+        renderPagination();
+      }
+    });
+    pagesDiv.appendChild(prevBtn);
+
+    // page numbers
+    let startPage = 1;
+    let endPage = Math.min(3, totalPages);
+    if (totalPages > 3) {
+      if (currentPage <= 2) {
+        startPage = 1;
+        endPage = 3;
+      } else if (currentPage >= totalPages - 1) {
+        startPage = totalPages - 2;
+        endPage = totalPages;
+      } else {
+        startPage = currentPage - 1;
+        endPage = currentPage + 1;
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      const pageBtn = document.createElement("button");
+      pageBtn.textContent = i;
+      pageBtn.classList.add("page-btn");
+      if (i === currentPage) pageBtn.classList.add("active");
+      pageBtn.addEventListener("click", () => {
+        currentPage = i;
+        renderProducts(currentPage);
+        renderPagination();
+      });
+      pagesDiv.appendChild(pageBtn);
+    }
+
+    // if more pages after endPage, add ...
+    if (endPage < totalPages) {
+      const dots = document.createElement("span");
+      dots.textContent = "...";
+      dots.style.margin = "0 5px";
+      pagesDiv.appendChild(dots);
+
+      // add last page
+      const lastBtn = document.createElement("button");
+      lastBtn.textContent = totalPages;
+      lastBtn.classList.add("page-btn");
+      lastBtn.addEventListener("click", () => {
+        currentPage = totalPages;
+        renderProducts(currentPage);
+        renderPagination();
+      });
+      pagesDiv.appendChild(lastBtn);
+    }
+
+    // next button
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = '<span class="material-symbols-outlined">arrow_forward</span>';
+    nextBtn.classList.add("page-btn");
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderProducts(currentPage);
+        renderPagination();
+      }
+    });
+    pagesDiv.appendChild(nextBtn);
+  }
 
   const token = localStorage.getItem("token");
   let favoritosList = [];
@@ -64,164 +295,17 @@ window.onload = async function () {
     }
   }
 
-  // admin visibility handled by shared/admin-link.js; do not inspect token string here
+  if (produtosContainer) {
+    produtosContainer.scrollIntoView({ behavior: "smooth" });
+  }
 
   /* ================= PRODUTOS ================= */
   fetch("http://localhost:3000/produtos")
     .then((res) => res.json())
     .then((produtos) => {
-      produtosContainer.innerHTML = "";
-
-      // manter lista completa e gerar página com 12 produtos aleatórios
-      const allProducts = Array.isArray(produtos) ? produtos : [];
-      // função de embaralhar (Fisher-Yates)
-      function shuffle(array) {
-        const a = array.slice();
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-
-      const pageProducts = shuffle(allProducts).slice(0, 12);
-
-      pageProducts.forEach((produto) => {
-        const div = document.createElement("div");
-        div.classList.add("produto");
-        div.style.position = "relative";
-
-        const isFav = favoritosList.includes(produto.id);
-
-        div.innerHTML = `
-          <button class="favoritoBTN" style="top:5px;right:8px;background:white;border:none;cursor:pointer;padding:5px;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:10;">
-            <span class="material-symbols-outlined" style="font-size:24px;color:${
-              isFav ? "#fa6db3" : "#999"
-            };">
-              ${isFav ? "favorite" : "favorite_border"}
-            </span>
-          </button>
-          <h3>${produto.titulo}</h3>
-          <img src="http://localhost:3000${produto.imagem_url || ""}" alt="${
-          produto.titulo
-        }">
-          <p>${produto.descricao}</p>
-          <p><strong>Preço:</strong> ${produto.preco}€</p>
-          <p><strong>Categoria:</strong> ${produto.categoria}</p>
-          <p><strong>Data:</strong> ${new Date(
-            produto.data_publicacao
-          ).toLocaleDateString()}</p>
-        `;
-
-        /* ========== handlers: favorito e abrir modal ========== */
-        const favoritoBTN = div.querySelector(".favoritoBTN");
-        const span = favoritoBTN ? favoritoBTN.querySelector("span") : null;
-
-        if (favoritoBTN) {
-          favoritoBTN.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (!token) {
-              mostrarAlerta("Faça login para adicionar favoritos", "#ff3b30");
-              return;
-            }
-
-            const isFavorited = favoritosList.includes(produto.id);
-            const method = isFavorited ? "DELETE" : "POST";
-            const url = isFavorited
-              ? `http://localhost:3000/favoritos/${produto.id}`
-              : "http://localhost:3000/favoritos";
-
-            const options = {
-              method,
-              headers: { Authorization: "Bearer " + token },
-            };
-            if (method === "POST") {
-              options.headers["Content-Type"] = "application/json";
-              options.body = JSON.stringify({ id_produto: produto.id });
-            }
-
-            fetch(url, options)
-              .then((res) => res.json())
-              .then(() => {
-                if (!isFavorited) {
-                  favoritosList.push(produto.id);
-                  if (span) {
-                    span.textContent = "favorite";
-                    span.style.color = "#fa6db3";
-                  }
-                  mostrarAlerta(
-                    `${produto.titulo} adicionado aos favoritos!`,
-                    "#00cc66"
-                  );
-                } else {
-                  favoritosList = favoritosList.filter(
-                    (id) => id !== produto.id
-                  );
-                  if (span) {
-                    span.textContent = "favorite_border";
-                    span.style.color = "#999";
-                  }
-                  mostrarAlerta(
-                    `${produto.titulo} removido dos favoritos!`,
-                    "#ff9500"
-                  );
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-                mostrarAlerta("Erro ao atualizar favorito", "#ff3b30");
-              });
-          });
-        }
-
-        div.addEventListener("click", (e) => {
-          if (e.target.closest(".favoritoBTN")) return; // previne abrir modal ao clicar no favorito
-
-          modal.style.display = "flex";
-          modalNome.textContent = produto.titulo || "";
-          modalDescricao.textContent = produto.descricao || "";
-          modalVendedor.textContent = `Vendedor: ${
-            produto.usuario_nome || "Vendedor"
-          }`;
-          modalImagem.src = produto.imagem_url
-            ? `http://localhost:3000${produto.imagem_url}`
-            : "";
-          modalImagem.alt = produto.titulo || "Imagem do produto";
-          modalPreco.textContent = produto.preco
-            ? `Preço: ${produto.preco}€`
-            : "";
-
-          const vendedorId = produto.vendedor;
-          if (!vendedorId) {
-            mostrarAlerta("Vendedor não encontrado", "#ff3b30");
-            return;
-          }
-
-          modalBTN.onclick = () => {
-            const produtoId = produto.id;
-            mostrarAlerta(
-              `Abrindo conversa com ${produto.usuario_nome || "Vendedor"}...`,
-              "#00cc66"
-            );
-            const tituloParam = encodeURIComponent(produto.titulo || "");
-            const precoParam = encodeURIComponent(produto.preco || "");
-            const imgUrl = produto.imagem_url
-              ? `http://localhost:3000${produto.imagem_url}`
-              : "";
-            const imgParam = encodeURIComponent(imgUrl);
-            const url = `../conversas/chat.html?vendedor=${encodeURIComponent(
-              vendedorId
-            )}&produto=${encodeURIComponent(
-              produtoId
-            )}&nome=${encodeURIComponent(
-              produto.usuario_nome || "Vendedor"
-            )}&titulo=${tituloParam}&preco=${precoParam}&img=${imgParam}`;
-            window.location.href = url;
-          };
-        });
-
-        produtosContainer.appendChild(div);
-      });
+      allProducts = Array.isArray(produtos) ? produtos : [];
+      renderProducts(currentPage);
+      renderPagination();
 
       /* ================= FILTRO ================= */
       if (filtro) {
@@ -311,6 +395,13 @@ window.onload = async function () {
 
   fechar.addEventListener("click", () => {
     modal.style.display = "none";
+  });
+
+  nextPagebtn.addEventListener("click", async () => {
+    window.location.reload();
+    if (produtosContainer) {
+      produtosContainer.scrollIntoView({ behavior: "smooth" });
+    }
   });
 
   window.addEventListener("click", (event) => {

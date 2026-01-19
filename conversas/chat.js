@@ -14,7 +14,6 @@ window.onload = async function () {
       1500
     );
   }
-  // admin visibility handled by shared/admin-link.js; do not inspect token string here
 
   const listaConversas = document.getElementById("listaConversas");
   const chatMensagens = document.getElementById("chatMensagens");

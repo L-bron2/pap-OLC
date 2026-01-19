@@ -7,9 +7,6 @@ if (localStorage.getItem("token") === null) {
 
 // Carregar dados do utilizador
 async function carregarPerfil() {
-  const areaAdmin = document.getElementById("area_admin");
-  // admin visibility handled by shared/admin-link.js; do not inspect token string here
-
   try {
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -44,7 +41,10 @@ async function carregarPerfil() {
       if (dataRaw) dataFmt = new Date(dataRaw).toLocaleDateString();
     } catch {}
 
-    // card
+
+    // editar nome
+    const editarNome = document.getElementById("editarNome");
+    // card utilizador
     const profileCard = document.getElementById("profileCard");
     if (profileCard) {
       profileCard.innerHTML = `
@@ -68,6 +68,32 @@ async function carregarPerfil() {
       inputImagem.style.display = "none";
       profileCard.appendChild(inputImagem);
     }
+
+    editarNome.addEventListener("click", async () => {
+      const novoNome = prompt("Digite o novo nome:", nome);
+      if (novoNome && novoNome.trim() !== "") {
+        try {
+          const resp = await fetch("http://localhost:3000/usuarios", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ nome: novoNome.trim() }),
+          });
+          if (resp.ok) {
+            mostrarAlerta("Nome atualizado com sucesso!", "#4BB543");
+            // Atualizar nome no DOM
+            const usernameDiv = document.querySelector(".username");
+            if (usernameDiv) usernameDiv.innerText = novoNome.trim();
+          } else {
+            mostrarAlerta("Falha ao atualizar nome.", "#ff3b30");
+          }
+        } catch (err) {
+          mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
+        }
+      }
+    });
 
     // deralhes
     div.innerHTML = `

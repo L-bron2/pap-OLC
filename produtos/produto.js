@@ -119,15 +119,14 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           if (response.ok) {
-            mostrarAlerta(result.msg || "Produto criado com sucesso!", "#4BB543", "✅");
+            mostrarAlerta(result.msg || "Produto criado com sucesso!", "#4BB543",);
             this.reset();
-
             campos.forEach((campo) => (campo.style.borderColor = ""));
             imagemInput.style.borderColor = "";
-
             setTimeout(() => {
               window.location.href = "../inicio/inicio.html";
-            }, 1000);
+            }, 3000);
+
           } else {
             mostrarAlerta(result.erro || result.err || result.message || "Erro inesperado ao criar produto.", "#ff3b30");
           }

@@ -1,4 +1,4 @@
-// Shared alert function used across pages
+// função para mostrar alertas na tela partilhada entre todas as paginas 
 function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
   let alerta = document.getElementById("alerta");
   if (!alerta) {
@@ -17,7 +17,7 @@ function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
   alerta.classList.add("mostrar");
   alerta.style.display = "block";
 
-  // clear previous timeout if any
+  // esconde o alerta após 3 segundos
   if (window.__mostrarAlertaTimeout)
     clearTimeout(window.__mostrarAlertaTimeout);
   window.__mostrarAlertaTimeout = setTimeout(() => {
@@ -26,5 +26,5 @@ function mostrarAlerta(mensagem, cor = "#ff3b30", icone = "") {
   }, 3000);
 }
 
-// Expose globally so pages can call mostrarAlerta
+// assim todas as paginas podem chamar a função para mostrar alertas
 window.mostrarAlerta = mostrarAlerta;

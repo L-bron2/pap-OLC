@@ -100,13 +100,18 @@ h1 {
 }
 .fechar-btn {
   position: absolute;
+  top: 8px;
+  right: 8px;
+
+  background: transparent;
   border: none;
-  font-size: 30px;
-  align-items: left;
+  font-size: 28px;
+  line-height: 1;
   cursor: pointer;
+
   color: var(--cor-cinza-escuro);
-  margin: auto;
 }
+
 .user-card .meta {
   font-size: 14px;
   color: var(--cor-cinza-escuro);
@@ -121,6 +126,7 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   z-index: 40;
+
 }
 
 .user-detail h2 {
