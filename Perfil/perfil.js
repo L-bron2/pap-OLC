@@ -5,6 +5,11 @@ if (localStorage.getItem("token") === null) {
   window.location.href = "../Login/login.html";
 }
 
+// Verificar se existe token
+if (localStorage.getItem("token") === null) {
+  window.location.href = "../Login/login.html";
+}
+
 // Carregar dados do utilizador
 async function carregarPerfil() {
   try {
@@ -21,6 +26,7 @@ async function carregarPerfil() {
 
     const usuarios = await response.json();
     const div = document.getElementById("usuarios");
+    if (!div) throw new Error("Elemento #usuarios não encontrado no DOM");
     div.innerHTML = "";
 
     const lista = Array.isArray(usuarios) ? usuarios : [usuarios];
@@ -41,9 +47,12 @@ async function carregarPerfil() {
       if (dataRaw) dataFmt = new Date(dataRaw).toLocaleDateString();
     } catch {}
 
+    // suportar vários IDs/seletores para o botão de editar nome
+    const editarNome =
+      document.getElementById("editarNome") ||
+      document.getElementById("EditNome") ||
+      document.querySelector(".editNome");
 
-    // editar nome
-    const editarNome = document.getElementById("editarNome");
     // card utilizador
     const profileCard = document.getElementById("profileCard");
     if (profileCard) {
@@ -55,6 +64,7 @@ async function carregarPerfil() {
                 <div class="edit-actions">
                     <button id="btnEditar" class="btn btn-edit">Editar bio</button>
                     <button id="btnAtualizarFoto" class="btn" style="background:var(--cor-roxo);color:#fff">Atualizar foto</button>
+                    <button id="btnRemoverFoto" class="btn btn-remove" style="background:#999;color:#fff">Remover foto</button>
                     <button id="btnSair" class="btn btn-logout">Sair</button>
                 </div>
             `;
@@ -69,33 +79,37 @@ async function carregarPerfil() {
       profileCard.appendChild(inputImagem);
     }
 
-    editarNome.addEventListener("click", async () => {
-      const novoNome = prompt("Digite o novo nome:", nome);
-      if (novoNome && novoNome.trim() !== "") {
-        try {
-          const resp = await fetch("http://localhost:3000/usuarios", {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ nome: novoNome.trim() }),
-          });
-          if (resp.ok) {
-            mostrarAlerta("Nome atualizado com sucesso!", "#4BB543");
-            // Atualizar nome no DOM
-            const usernameDiv = document.querySelector(".username");
-            if (usernameDiv) usernameDiv.innerText = novoNome.trim();
-          } else {
-            mostrarAlerta("Falha ao atualizar nome.", "#ff3b30");
+    // editar nome
+    if (editarNome) {
+      editarNome.addEventListener("click", async () => {
+        const novoNome = prompt("Digite o novo nome:", nome);
+        if (novoNome && novoNome.trim() !== "") {
+          try {
+            const resp = await fetch("http://localhost:3000/usuarios", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ nome: novoNome.trim() }),
+            });
+            if (resp.ok) {
+              mostrarAlerta("Nome atualizado com sucesso!", "#4BB543");
+              // Atualizar nome no DOM
+              const usernameDiv = document.querySelector(".username");
+              if (usernameDiv) usernameDiv.innerText = novoNome.trim();
+            } else {
+              const txt = await resp.text().catch(() => "");
+              mostrarAlerta("Falha ao atualizar nome: " + txt, "#ff3b30");
+            }
+          } catch (err) {
+            mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
           }
-        } catch (err) {
-          mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
         }
-      }
-    });
+      });
+    }
 
-    // deralhes
+    // detalhes / bio
     div.innerHTML = `
             <div class="section-title">Informações</div>
             <p class="bio" id="bioText">${
@@ -249,11 +263,15 @@ async function carregarPerfil() {
       });
     }
 
-    // Botão apagar conta
-    const apagarConta = document.getElementById("apagarConta");
-    if (apagarConta) {
-      apagarConta.addEventListener("click", async () => {
-        // espera a confirmação do utilizador para apagar a conta
+    // Botão apagar conta (lidar com possíveis duplicados no HTML)
+    const apagarContaEl = document.getElementById("apagarConta");
+    let apagarContaBtn = null;
+    if (apagarContaEl) {
+      if (apagarContaEl.tagName === "BUTTON") apagarContaBtn = apagarContaEl;
+      else apagarContaBtn = apagarContaEl.querySelector("button") || apagarContaEl;
+    }
+    if (apagarContaBtn) {
+      apagarContaBtn.addEventListener("click", async () => {
         const confirmar = confirm(
           "Tem certeza que deseja apagar a sua conta? Esta ação é irreversível e irá:\n- Remover todos os seus produtos\n- Remover todas as suas mensagens\n- Remover todos os seus favoritos\n- Apagar a sua conta permanentemente"
         );
@@ -285,7 +303,6 @@ async function carregarPerfil() {
             "Conta apagada com sucesso! A redirecionar...",
             "#4caf50"
           );
-          // Remover token e redirecionar após 2 segundos
           setTimeout(() => {
             localStorage.removeItem("token");
             window.location.href = "../inicio/inicio.html";
@@ -298,12 +315,13 @@ async function carregarPerfil() {
 
     //atualizar foto
     const btnAtualizarFoto = document.getElementById("btnAtualizarFoto");
+    const btnRemoverFoto = document.getElementById("btnRemoverFoto");
     const inputFile = document.getElementById("imagem");
     if (btnAtualizarFoto && inputFile) {
       // quando clicar abre o explorador
       btnAtualizarFoto.addEventListener("click", () => inputFile.click());
 
-      // enviar automaticamente a ft
+      // enviar automaticamente a foto
       inputFile.addEventListener("change", async () => {
         const arquivo = inputFile.files[0];
         if (!arquivo) return;
@@ -333,13 +351,37 @@ async function carregarPerfil() {
               "#4BB543"
             );
             const avatarImg = document.getElementById("avatarImg");
-            if (avatarImg && resultado.foto_url)
-              avatarImg.src = resultado.foto_url;
+            if (avatarImg && resultado.foto_url) avatarImg.src = resultado.foto_url;
           } else {
-            mostrarAlerta(
-              resultado.erro || "Erro ao atualizar foto.",
-              "#ff3b30"
-            );
+            mostrarAlerta(resultado.erro || "Erro ao atualizar foto.", "#ff3b30");
+          }
+        } catch (err) {
+          mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
+        }
+      });
+    }
+
+    // remover foto
+    if (btnRemoverFoto) {
+      btnRemoverFoto.addEventListener("click", async () => {
+        const confirmar = confirm("Deseja remover a sua foto de perfil?");
+        if (!confirmar) return;
+        try {
+          const resp = await fetch("http://localhost:3000/usuarios", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ remover_foto: true }),
+          });
+          const data = await resp.json().catch(() => ({}));
+          if (resp.ok) {
+            mostrarAlerta(data.msg || "Foto removida", "#4BB543");
+            const avatarImg = document.getElementById("avatarImg");
+            if (avatarImg) avatarImg.src = "../imagens/default.png";
+          } else {
+            mostrarAlerta(data.erro || "Erro ao remover foto.", "#ff3b30");
           }
         } catch (err) {
           mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
@@ -373,45 +415,47 @@ async function carregarPerfil() {
 
         const detalhes = document.querySelector(".profile-details");
         if (detalhes) detalhes.appendChild(area);
+        else if (profileCard) profileCard.appendChild(area);
+        else div.appendChild(area);
 
         const btnCancelar = document.getElementById("btnCancelDesc");
         const btnGuardar = document.getElementById("btnSaveDesc");
 
-        btnCancelar.addEventListener("click", () => {
-          area.remove();
-        });
+        if (btnCancelar) {
+          btnCancelar.addEventListener("click", () => {
+            area.remove();
+          });
+        }
 
-        btnGuardar.addEventListener("click", async () => {
-          const novoTexto = document
-            .getElementById("descricaoInput")
-            .value.trim();
-          // Atualizar DOM
-          if (bioText)
-            bioText.innerText =
-              novoTexto || "Adicione uma descrição sobre si mesmo.";
-          area.remove();
+        if (btnGuardar) {
+          btnGuardar.addEventListener("click", async () => {
+            const novoTexto = document.getElementById("descricaoInput").value.trim();
+            // Atualizar DOM
+            if (bioText) bioText.innerText = novoTexto || "Adicione uma descrição sobre si mesmo.";
+            area.remove();
 
-          try {
-            const resp = await fetch("http://localhost:3000/usuarios", {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ descricao: novoTexto }),
-            });
-            if (resp.ok) {
-              mostrarAlerta("Descrição atualizada com sucesso!", "#4BB543");
-            } else {
-              mostrarAlerta("Descrição atualizada com sucesso!.", "#4bb543");
+            try {
+              const resp = await fetch("http://localhost:3000/usuarios", {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ descricao: novoTexto }),
+              });
+              if (resp.ok) {
+                mostrarAlerta("Descrição atualizada com sucesso!", "#4BB543");
+              } else {
+                mostrarAlerta("Descrição atualizada com sucesso!.", "#4bb543");
+              }
+            } catch (err) {
+              mostrarAlerta(
+                "Não foi possível guardar no servidor. Atualizado localmente.",
+                "#ffb84d"
+              );
             }
-          } catch (err) {
-            mostrarAlerta(
-              "Não foi possível guardar no servidor. Atualizado localmente.",
-              "#ffb84d"
-            );
-          }
-        });
+          });
+        }
       });
     }
   } catch (error) {

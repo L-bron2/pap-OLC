@@ -9,11 +9,9 @@
     #4e0063,
     #5c0a00
   );
-  --cor-navbar-link: #ffffff;
-  --cor-navbar-hover: #ff6600;
   --cor-branco: #f5f5f5;
-  --cor-cinza-escuro: #333333;
-  --cor-cinza-medio: #666666;
+  --cor-cinza-escuro: #333;
+  --cor-cinza-medio: #666;
   --cor-vermelho: #ff3b30;
 }
 
@@ -22,17 +20,16 @@
   margin: 0;
   padding: 0;
 }
+
 body {
   font-family: "Raleway", "Poppins", sans-serif;
   background: var(--cor-branco);
   color: var(--cor-cinza-escuro);
 }
 
-/* Navbar */
+/* ================= NAVBAR ================= */
 nav {
   background: var(--cor-navbar-gradiente);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -42,120 +39,123 @@ nav {
   z-index: 1000;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
+
 .logo {
-  color: var(--cor-navbar-link);
-  text-decoration: none;
+  color: #fff;
   font-size: 36px;
   font-weight: 700;
+  text-decoration: none;
 }
+
 ul.navbar-links {
   list-style: none;
   display: flex;
-  margin: 0;
-  padding: 0;
-}
-ul.navbar-links li a {
-  color: var(--cor-navbar-link);
-  text-decoration: none;
-  padding: 10px 15px;
-  position: relative;
-}
-ul.navbar-links li a::after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background: var(--cor-navbar-hover);
-  transition: width 0.25s;
-}
-ul.navbar-links li a:hover {
-  color: var(--cor-navbar-hover);
-}
-ul.navbar-links li a:hover::after {
-  width: 100%;
+  gap: 18px;
 }
 
-h1 {
-  font-size: 32px;
-  margin: 159px;
-  margin-top: 20px;
-  margin-bottom: 15px;
-  font-weight: 800;
-  color: var(--cor-roxo);
-  text-shadow: #333333;
-  right: 400px;
+ul.navbar-links a {
+  color: #fff;
+  padding: 8px;
 }
 
-/* Estrutura do perfil */
+
+/* ================= CONTAINER ================= */
 .profile-container {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
+
+/* ================= GRID ================= */
 .profile-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 24px;
+  grid-template-columns: 360px 1fr;
+  gap: 30px;
   align-items: start;
 }
 
-/* Cartão do perfil */
+/* ================= CARD PERFIL ================= */
 .profile-card {
+  position: relative;
   background: #fff;
-  border: 1.5px solid rgba(140, 76, 255, 0.08);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
-.avatar {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 6px solid rgba(0, 0, 0, 0.04);
+
+/* ================= BTN PARA EDITAR DENTRO DO CARD ================= */
+.editNome,
+#EditNome {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--cor-roxo);
+  color: #fff;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #fff, #f6f6f8);
 }
+
+/* ================= AVATAR ================= */
+.avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #eee;
+  margin-bottom: 12px;
+}
+
 .avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+
+/* ================= TEXTO PERFIL ================= */
 .username {
-  margin-top: 12px;
   font-size: 20px;
   font-weight: 700;
-}
-.user-email {
-  color: var(--cor-cinza-medio);
-  font-size: 14px;
-  margin-top: 6px;
-}
-.user-since {
-  color: var(--cor-cinza-medio);
-  font-size: 13px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
+.user-email {
+  font-size: 14px;
+  color: var(--cor-cinza-medio);
+  margin-top: 4px;
 }
+
+.user-since {
+  font-size: 13px;
+  color: var(--cor-cinza-medio);
+  margin-top: 6px;
+}
+
+/* ================= BOTÕES PERFIL ================= */
+.edit-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
 .btn {
-  padding: 10px 14px;
+  padding: 12px;
   border-radius: 10px;
   border: none;
-  cursor: pointer;
   font-weight: 700;
+  cursor: pointer;
 }
+
 .btn-edit {
   background: linear-gradient(135deg, var(--cor-roxo), var(--cor-laranja));
   color: #fff;
@@ -163,179 +163,126 @@ h1 {
 
 .btn-logout {
   background: #f3f4f6;
-  color: var(--cor-cinza-escuro);
 }
 
-/* detalhes do perfil */
+/* ================= DETALHES ================= */
 .profile-details {
   background: #fff;
-  border-radius: 12px;
-  padding: 19px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
+
 .section-title {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .bio {
   color: var(--cor-cinza-medio);
-  line-height: 1.45;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-/* grid de produtos do utilizador (se houver) */
+/* ================= PRODUTOS ================= */
 .produtos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
 }
+
 .produto-card {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
+
 .produto-card img {
   width: 100%;
   height: 140px;
   object-fit: cover;
   border-radius: 8px;
 }
+
 .produto-titulo {
   font-weight: 700;
-  margin-top: 10px;
+  margin-top: 8px;
 }
+
 .produto-preco {
   color: var(--cor-verde);
   font-weight: 700;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-/* bio */
-.edit-area {
-  margin-top: 12px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.edit-area textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  resize: vertical;
-  font-family: inherit;
-}
-.save-cancel {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-.btn-save {
-  background: var(--cor-roxo);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-.btn-cancel {
-  background: #f3f4f6;
-  color: var(--cor-cinza-escuro);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-
-.usuarios {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.apagarConta button a {
+/* ================= APAGAR CONTA ================= */
+.apagarConta {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+}
+
+.apagarConta button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--cor-vermelho);
   border: none;
+  color: #fff;
   cursor: pointer;
-  transition: 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
 }
 
-.apagarConta button a:hover {
-  border-radius: 100%;
-  transform: scale(1.8);
-}
-
+/* ================= RODAPÉ ================= */
 footer {
-  margin-top: 10px;
-  padding: 15px;
-  background-color: #e6e3e3;
+  margin-top: 40px;
+  padding: 28px 16px;
+  background: #f0f0f3;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .rodape {
+  max-width: 1100px;
+  margin: 0 auto;
   text-align: center;
-  margin: 15px;
-  margin-top: 15px;
   color: var(--cor-cinza-medio);
   font-size: 14px;
-  font-weight: 500;
+  line-height: 1.6;
 }
 
-
-
-/* alerta  */
-.alerta {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--cor-vermelho);
-  color: #fff;
-  padding: 14px 18px;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-  z-index: 2000;
-  display: none;
+.rodape p {
+  margin-bottom: 10px;
 }
-.alerta.mostrar {
+
+.rodape strong {
+  color: var(--cor-cinza-escuro);
+  font-weight: 600;
+}
+
+/* separador visual subtil */
+.rodape p:not(:last-child)::after {
+  content: "";
   display: block;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--cor-roxo),
+    var(--cor-laranja)
+  );
+  margin: 14px auto;
+  border-radius: 4px;
 }
 
-/* responsividade */
+/* ================= RESPONSIVIDADE ================= */
 @media (max-width: 900px) {
   .profile-grid {
     grid-template-columns: 1fr;
   }
-  .avatar {
-    width: 140px;
-    height: 140px;
-  }
-}
-@media (max-width: 420px) {
-  nav {
-    padding: 12px 16px;
-  }
-  h1 {
-    font-size: 22px;
-  }
-  .avatar {
-    width: 120px;
-    height: 120px;
-  }
-  .profile-container {
-    padding: 12px;
+
+  .profile-card {
+    align-items: center;
   }
 }

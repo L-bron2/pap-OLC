@@ -218,6 +218,71 @@ app.get("/usuarios/id", autenticar, (req, res) => {
   });
 });
 
+// Atualizar dados do usuário (nome, descricao) e permitir remover foto
+app.patch("/usuarios", autenticar, (req, res) => {
+  const userId = req.userId;
+  const { nome, descricao, remover_foto } = req.body;
+
+  // Helper para transformar URL em caminho local
+  function toLocalPath(url) {
+    if (!url) return null;
+    if (url.startsWith("/")) return url.slice(1);
+    try {
+      const parsed = new URL(url);
+      return parsed.pathname.startsWith("/") ? parsed.pathname.slice(1) : parsed.pathname;
+    } catch (e) {
+      return url;
+    }
+  }
+
+  // Se for pedido remover foto, buscar a foto atual e eliminar ficheiro
+  if (remover_foto) {
+    db.query("SELECT foto_url FROM usuarios WHERE id = ?", [userId], (err, rows) => {
+      if (err) return res.status(500).json({ erro: err.message });
+      const foto = rows && rows[0] ? rows[0].foto_url : null;
+      if (foto) {
+        const fotoPath = toLocalPath(foto);
+        if (fotoPath) {
+          const fullFoto = path.join(__dirname, fotoPath);
+          fs.unlink(fullFoto, (unlinkErr) => {
+            if (unlinkErr)
+              console.warn("Aviso - Não foi possível apagar foto do utilizador:", unlinkErr.message);
+          });
+        }
+      }
+
+      db.query("UPDATE usuarios SET foto_url = NULL WHERE id = ?", [userId], (err2) => {
+        if (err2) return res.status(500).json({ erro: err2.message });
+        return res.json({ msg: "Foto removida com sucesso" });
+      });
+    });
+    return;
+  }
+
+  // Construir query dinâmica para nome/descricao
+  const fields = [];
+  const params = [];
+  if (typeof nome === "string" && nome.trim() !== "") {
+    fields.push("nome = ?");
+    params.push(nome.trim());
+  }
+  if (typeof descricao === "string") {
+    fields.push("descricao = ?");
+    params.push(descricao);
+  }
+
+  if (fields.length === 0) {
+    return res.status(400).json({ erro: "Nada para atualizar" });
+  }
+
+  const sql = `UPDATE usuarios SET ${fields.join(", ")} WHERE id = ?`;
+  params.push(userId);
+  db.query(sql, params, (err3, result) => {
+    if (err3) return res.status(500).json({ erro: err3.message });
+    return res.json({ msg: "Dados atualizados com sucesso" });
+  });
+});
+
 // Rota administrativa: listar todos os utilizadores (apenas admins)
 app.get("/usuarios", autenticar, autorizarAdmin, (req, res) => {
   db.query(
