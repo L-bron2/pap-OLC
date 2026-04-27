@@ -1,52 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="login.css" />
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-  </head>
-  <body>
-    <div class="login">
-      <nav>
-        <a href="../inicio/inicio.html" class="logo">Trovix</a>
-        <ul class="navbar-links">
-          <li><a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a></li>
-        </ul>
-      </nav>  
+<html lang="pt">
 
-      <!-- caixa do login  -->
-      <div class="login_box">
-        <h1>Login</h1>
-        <form id="formLogin">
-          <input
-            type="text"
-            id="email"
-            class="input"
-            placeholder="Ex: meuemail@gmail.com"
-            required
-          />
-          <input
-            type="password"
-            id="palavra-passe"
-            class="input"
-            placeholder="Palavra passe"
-            required
-          />
-          <a href="../criar conta/criarConta.html" id="criarConta">Criar conta</a>
-          <a href="../recuperarSenha/rSenha.html" id="recuperarSenha">Esqueceu a palavra passe?</a>
-          <button type="submit" class="BTN">Login</button>
-        </form>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      <!-- alerta -->
-      <div class="alerta" id="alerta" style="display: none;">Alerta</div>
+  <link rel="stylesheet" href="login.css" />
+  <link rel="icon" href="../favicon/Favicon final.png">
 
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+</head>
 
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navBar">
+    <a href="../inicio/inicio.html" class="logo">Trovix</a>
+
+    <ul class="navbar-links">
+      <li>
+        <a href="../inicio/inicio.html">
+          <span class="material-symbols-outlined">home</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- LOGIN -->
+  <div class="login_box">
+
+    <h1>Login</h1>
+
+    <form id="formLogin">
+
+      <input
+        type="text"
+        id="email"
+        class="input"
+        placeholder="Email"
+        required
+      />
+
+      <input
+        type="password"
+        id="palavra-passe"
+        class="input"
+        placeholder="Palavra-passe"
+        required
+      />
+
+      <a href="../criar conta/criarConta.html">
+        Criar conta
+      </a>
+
+      <a href="../recuperarSenha/rSenha.html">
+        Esqueceu a palavra-passe?
+      </a>
+
+      <button type="submit" class="BTN">
+        Login
+      </button>
+
+    </form>
+
+  </div>
+
+  <!-- ALERTA -->
+  <div class="alerta" id="alerta">Alerta</div>
 
   <script src="../shared/alerts.js"></script>
   <script src="login.js"></script>
-  </body>
+
+</body>
+
 </html>

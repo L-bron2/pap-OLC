@@ -1,4 +1,3 @@
-// -------------------- IMPORTS -------------------- //
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
@@ -6,9 +5,9 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require("path");
 const multer = require("multer");
+const nodemailer = require("nodemailer");
 const fs = require("fs");
 
-// -------------------- INICIALIZAÇÃO -------------------- //
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -17,7 +16,6 @@ app.use(cors());
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 if (!fs.existsSync("FTperfil")) fs.mkdirSync("FTperfil");
 
-// -------------------- MULTER -------------------- //
 // Upload de imagens de perfil
 const imgStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,12 +38,20 @@ const productStorage = multer.diskStorage({
 });
 const upload = multer({ storage: productStorage });
 
-// -------------------- CONEXÃO COM DB -------------------- //
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "Erlander",
   database: "OLC",
+});
+
+//SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'nobreerlander@gmail.com',
+    pass:'aksk dhds ufjw khuw',
+  },
 });
 
 db.connect((err) => {
@@ -57,7 +63,6 @@ db.connect((err) => {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/FTperfil", express.static(path.join(__dirname, "FTperfil")));
 
-// -------------------- AUTENTICAÇÃO JWT -------------------- //
 function autenticar(req, res, next) {
   let token = req.headers["authorization"];
   if (!token) return res.status(403).json({ erro: "Token não fornecido" });
@@ -77,8 +82,6 @@ function autorizarAdmin(req, res, next) {
     return res.status(403).json({ erro: "Área reservada para administradores" });
   next();
 }
-
-// -------------------- ROTAS DE RECUPERAÇÃO DA PALAVRA PASSE-------------------- //
 
 // Verificar utilizador para recuperar senha
 app.post("/recuperar/verificar", (req, res) => {
@@ -115,9 +118,6 @@ app.post("/recuperar/alterar", async (req, res) => {
   );
 });
 
-// -------------------- ROTAS -------------------- //
-
-// -------------------- Conta -------------------- //
 
 // Criar conta
 app.post("/usuarios", async (req, res) => {
