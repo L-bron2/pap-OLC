@@ -1,319 +1,270 @@
+/* ================= ROOT ================= */
 :root {
-  --cor-laranja: #ff6600;
-  --cor-verde: #00cc66;
-  --cor-roxo: #8c4cff;
+  --fundo: linear-gradient(135deg, #f8fafc, #e2e8f0);
 
-  --cor-cinza-escuro: #333;
-  --cor-cinza-medio: #666;
-  --cor-cinza-claro: #eee;
+  --card: rgba(255, 255, 255, 0.85);
+  --glass: rgba(255, 255, 255, 0.65);
 
-  --cor-navbar-gradiente: linear-gradient(
-    135deg,
-    #2a0035,
-    #3b0042,
-    #4e0063,
-    #6a0f00
-  );
+  --texto: #0f172a;
+  --texto-suave: #64748b;
 
-  --cor-branco: #f5f5f5;
-  --cor-vermelho: #ff3b30;
+  --borda: rgba(0, 0, 0, 0.08);
+
+  --botao: #0f172a;
+  --botao-hover: #1e293b;
+
+  --erro: rgba(255, 59, 48, 0.9);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  background-color: var(--cor-branco);
-  color: var(--cor-cinza-escuro);
-  font-family: "Raleway", "Poppins", sans-serif;
-  margin: 0;
+  background: var(--fundo);
+  min-height: 100vh;
 }
 
-/* barra de navegação */
 nav {
-  background: var(--cor-navbar-gradiente);
-  padding: 1rem 2.5rem;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 92%;
+  max-width: 1200px;
+
+  padding: 12px 20px;
+
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
+  align-items: center;
+
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border-radius: 18px;
+  border: 1px solid var(--borda);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
   z-index: 1000;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
 
-/* Logo */
+/* LOGO */
 .logo {
-  color: white;
-  text-decoration: none;
-  font-size: 36px;
-  font-weight: 700;
-}
-
-/* Links */
-ul.navbar-links {
-  list-style: none;
-  display: flex;
-  gap: 28px;
-  margin: 0;
-  padding: 0;
-}
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-ul.navbar-links li a {
-  color: white;
+  color: var(--texto);
   font-size: 20px;
-  transition: color 0.3s;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: 0.3s ease;
 }
 
-ul.navbar-links li a:hover {
-  color: var(--cor-laranja);
-}
-
-/* barra de pesquisa */
-.Procurar {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 100px;
-  font-size: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  max-width: 240px;
-}
-
-/* estilização dos conteudos do modal */
-.modal-content {
-  font-family: "Poppins", sans-serif;
-  margin: 5px;
-  font-size: 1.1rem;
-  padding: 20px;
-}
-
-/* Botão filtro */
-.filtro {
-  margin-left: 10px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s;
-}
-
-.filtro:hover {
+.logo:hover {
   transform: scale(1.1);
 }
 
-.filtro span {
-  font-size: 22px;
-  color: var(--cor-cinza-escuro);
+/* NAV LINKS */
+ul.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 14px;
 }
 
-/* formulário de filtro dentro do modal */
-.filtro-form {
+ul.navbar-links li a {
+  color: var(--texto-suave);
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+
+ul.navbar-links li a:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--texto);
+}
+
+/* RIGHT SIDE */
+.nav-right {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 12px;
 }
-.filtro-form label {
-  font-size: 0.95rem;
-  color: var(--cor-cinza-escuro);
-  margin-bottom: 6px;
-}
-.filtro-form select,
-.filtro-form input[type="number"] {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 6px 18px rgba(12, 6, 20, 0.04);
-  background: linear-gradient(180deg, #ffffff, #fbfbfc);
-  transition: box-shadow 0.18s ease, transform 0.12s ease;
-}
-.filtro-form select:focus,
-.filtro-form input[type="number"]:focus {
+
+/* SEARCH */
+.Procurar {
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--borda);
+
+  background: rgba(255, 255, 255, 0.8);
   outline: none;
-  box-shadow: 0 8px 26px rgba(140, 76, 255, 0.12);
-  transform: translateY(-1px);
-}
-.filtro-row {
-  display: flex;
-  gap: 10px;
-}
-.filtro-row > div {
-  flex: 1;
+
+  max-width: 220px;
 }
 
-/* botão para passar para a próxima página de produtos */
-.NextPage {
-  margin: 20px auto;
-  display: block;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
-  color: white;
-  border: none;
-  border-radius: 10px;
+/* FILTRO BUTTON */
+.filtro {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  border: 1px solid var(--borda);
+  background: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   cursor: pointer;
-  font-size: 1.1rem;
-  box-shadow: 0 6px 20px rgba(140, 76, 255, 0.12);
+
+  transition: 0.2s;
+}
+
+.filtro:hover {
+  transform: scale(1.05);
+}
+
+.Produtos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+
+  margin: 120px auto 40px;
+  max-width: 1200px;
+}
+
+/* CARD PRODUTO */
+.produto {
+  background: var(--card);
+  border: 1px solid var(--borda);
+
+  border-radius: 16px;
+  padding: 18px;
+
+  width: 240px;
+  min-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  transition: 0.25s;
+
+  position: relative;
+}
+
+.produto:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* IMAGEM */
+.produto img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+
+  border-radius: 10px;
+}
+
+/* TEXTOS */
+.produto h2 {
+  color: var(--texto);
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.produto p {
+  color: var(--texto-suave);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* botão novo produto */
+.BTN_Produto {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+
+  width: 180px;
+  height: 48px;
+
+  border-radius: 12px;
+  border: none;
+
+  background: var(--botao);
+  color: white;
+
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.BTN_Produto:hover {
+  transform: translateY(-2px);
+  background: var(--botao-hover);
+}
+/* 
+paginação */
+.Pages {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.NextPage {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+  border: 1px solid var(--borda);
+
+  background: white;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: 0.2s;
 }
 
 .NextPage:hover {
   transform: scale(1.05);
 }
 
-/* ================= PAGINAÇÃO ================= */
-.Pages {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.page-btn {
-  padding: 8px 12px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-}
-
-.page-btn.active {
-  background: var(--cor-laranja);
-  color: white;
-  border-color: var(--cor-laranja);
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ================= BOTÕES PADRÃO ================= */
-.BTN {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  height: 50px;
-  border: none;
-  transition: transform 0.2s;
-}
-
-.BTN:hover {
-  transform: scale(1.05);
-}
-
-/* Botão aplicar filtros (reaproveita .BTN padrão se existir) */
-.modal-actions .BTN {
-  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
-  color: #fff;
-  border-radius: 10px;
-  padding: 10px 16px;
-  box-shadow: 0 6px 20px rgba(140, 76, 255, 0.12);
-}
-
-/* ================= PRODUTOS ================= */
-.Produtos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
-  margin: 30px auto;
-  max-width: 1200px;
-}
-
-.produto {
-  background: white;
-  border: 1.5px solid var(--cor-roxo);
-  border-radius: 12px;
-  padding: 20px;
-  width: 235px;
-  min-height: 380px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: 0.3s;
-  position: relative; /* garante posicionamento absoluto de botões dentro do card */
-}
-
-.produto:hover {
-  transform: translateY(-6px);
-  border-color: var(--cor-laranja);
-}
-
-.produto img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.produto h2 {
-  color: var(--cor-roxo);
-  font-size: 1.2rem;
-  text-align: center;
-}
-
-.produto p {
-  font-size: 0.9rem;
-  text-align: center;
-  color: var(--cor-cinza-medio);
-}
-
-/* ================= FAVORITO ================= */
-.favoritoBTN {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  border: none;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-  padding: 6px;
-  box-shadow: 0 6px 18px rgba(12, 6, 20, 0.06);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.favoritoBTN:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(12, 6, 20, 0.09);
-}
-
-.favoritoBTN span {
-  font-size: 20px;
-}
-
-/* ================= MODAL ================= */
+/* modal */
 #caixaFlutuante {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+
+  background: rgba(0, 0, 0, 0.4);
+
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1200;
+
+  z-index: 2000;
 }
 
 .detalhes {
   background: white;
-  max-width: 800px;
+  border-radius: 18px;
+
   width: 95%;
-  border-radius: 16px;
-  padding: 24px;
-  position: relative;
-  animation: aparecer 0.3s ease;
+  max-width: 800px;
+
+  padding: 25px;
+
+  animation: fadeUp 0.3s ease;
 }
 
 .modal-body {
@@ -321,58 +272,19 @@ ul.navbar-links li a:hover {
   gap: 20px;
 }
 
-/* Ocultar o botão fechar interno do modal (remover o 'x' canto superior esquerdo) */
-#fechar {
-  display: none !important;
-}
-
+/* imagem modal */
 .modal-img {
   width: 100%;
   height: 320px;
   object-fit: cover;
-  border-radius: 10px;
-}
-
-/* ================= BOTÃO FLUTUANTE ================= */
-.BTN_Produto {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 180px;
-  height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.BTN_Produto:hover {
-  transform: scale(1.07);
-}
-
-/* ================= ALERTA ================= */
-.alerta {
-  position: fixed;
-  /* aparece abaixo da navbar e acima do restante */
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--cor-vermelho);
-  color: white;
-  padding: 16px 22px;
-  border-radius: 10px;
-  display: none;
-  z-index: 3000;
-}
-
-/* ================= ANIMAÇÃO ================= */
-@keyframes aparecer {
+/* animação */
+@keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(-15px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -380,10 +292,37 @@ ul.navbar-links li a:hover {
   }
 }
 
-/* ================= RESPONSIVO ================= */
-@media (max-width: 760px) {
+/* alerta */
+.alerta {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: var(--erro);
+  color: white;
+
+  padding: 14px 20px;
+  border-radius: 10px;
+
+  opacity: 0;
+  transition: 0.3s;
+
+  z-index: 3000;
+}
+
+.alerta.mostrar {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+/* responsividade */
+@media (max-width: 768px) {
   .modal-body {
     flex-direction: column;
-    text-align: center;
+  }
+
+  .Produtos {
+    margin-top: 140px;
   }
 }
