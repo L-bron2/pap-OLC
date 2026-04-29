@@ -1,114 +1,98 @@
 :root {
-  /* Cores principais */
-  --cor-laranja: #ff6600;
-  --cor-verde: #00cc66;
-  --cor-roxo: #8c4cff;
+  --fundo: linear-gradient(135deg, #f8fafc, #e2e8f0);
 
-  /* Cores secundárias */
-  --cor-cinza-escuro: #333333;
-  --cor-cinza-medio: #666666;
-  --cor-cinza-claro: #eeeeee;
+  --card: rgba(255, 255, 255, 0.8);
+  --navbar: rgba(255, 255, 255, 0.7);
 
-  /*Navbar */
-  --cor-navbar-gradiente: linear-gradient(
-    135deg,
-    #2a0035,
-    #3b0042,
-    #4e0063,
-    #6a0f00
-  );
-  --cor-navbar-link: #ffffff;
-  --cor-navbar-hover: #ff6600;
+  --texto: #0f172a;
+  --texto-suave: #64748b;
 
-  /* Fundo */
-  --cor-branco: #f5f5f5;
-  --cor-cinza-muito-claro: #f9f9f9;
+  --borda: rgba(0, 0, 0, 0.08);
 
-  /* Alertas */
-  --cor-vermelho: #ff3b30;
-  --cor-amarelo: #ffcc00;
+  --botao: #0f172a;
+  --botao-hover: #1e293b;
+
+  --erro: rgba(255, 59, 48, 0.9);
 }
 
-/* Body */
-body {
-  background-color: var(--cor-branco);
-  color: var(--cor-cinza-escuro);
-  font-family: "Raleway", "Poppins", sans-serif;
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
-/* Barra de navegação */
+/* BODY */
+body {
+  background: var(--fundo);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* NAVBAR */
 nav {
-  background: var(--cor-navbar-gradiente);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 1rem 2.5rem;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 92%;
+  max-width: 1100px;
+  padding: 12px 20px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  background: var(--navbar);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border-radius: 18px;
+  border: 1px solid var(--borda);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
 }
 
-/* Logo */
+/* LOGO */
 .logo {
-  color: var(--cor-navbar-link);
+  color: var(--texto);
+  font-size: 20px;
+  font-weight: 600;
   text-decoration: none;
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  transition: color 0.3s ease, transform 0.3s ease;
+
+  transition: 0.3s ease;
 }
 
 .logo:hover {
-  color: var(--cor-laranja);
-  transform: scale(1.08);
-  text-shadow: 0 0 10px rgba(255, 102, 0, 0.6);
+  transform: scale(1.1);
 }
 
-/* Links da navbar */
+/* LINKS */
 ul.navbar-links {
   list-style: none;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 28px;
-  margin: 0;
-  padding: 0;
+  gap: 10px;
 }
 
 ul.navbar-links li a {
-  color: var(--cor-navbar-link);
-  text-decoration: none;
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  position: relative;
-  transition: color 0.3s ease;
-}
-
-ul.navbar-links li a::after {
-  content: "";
-  position: absolute;
-  width: 0%;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: var(--cor-navbar-hover);
-  box-shadow: 0 0 6px rgba(255, 102, 0, 0.5);
-  transition: width 0.3s ease;
+  color: var(--texto-suave);
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: 0.2s;
 }
 
 ul.navbar-links li a:hover {
-  color: var(--cor-navbar-hover);
+  background: rgba(0,0,0,0.05);
+  color: var(--texto);
 }
 
-ul.navbar-links li a:hover::after {
-  width: 100%;
-}
+
+
 
 /* Layout do chat */
 .chat-wrap {

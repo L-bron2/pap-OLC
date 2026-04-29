@@ -1,12 +1,7 @@
 const token = localStorage.getItem("token");
 
 // Verificar se existe token
-if (localStorage.getItem("token") === null) {
-  window.location.href = "../Login/login.html";
-}
-
-// Verificar se existe token
-if (localStorage.getItem("token") === null) {
+if (!token) {
   window.location.href = "../Login/login.html";
 }
 

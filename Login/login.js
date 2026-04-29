@@ -1,3 +1,15 @@
+const loading = document.getElementById("Loading")
+// Mostrar loading
+function mostrarLoading() {
+  loading.style.display = "flex";
+  produtosContainer.innerHTML = "";
+}
+
+// Esconder loading
+function esconderLoading() {
+  loading.style.display = "none";
+}
+
 document
   .getElementById("formLogin")
   .addEventListener("submit", async function (e) {
@@ -35,13 +47,13 @@ document
       } else {
         mostrarAlerta(
           result.erro || result.err || "Email ou palavra passe incorreto",
-          "#ff3b30"
+          "#ff3b30",
         );
       }
     } catch (error) {
       mostrarAlerta(
         "Erro de conexão com o servidor: " + error.message,
-        "#ff3b30"
+        "#ff3b30",
       );
       console.error("Erro fetch login:", error);
     }

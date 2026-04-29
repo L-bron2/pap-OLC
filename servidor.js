@@ -1,3 +1,4 @@
+//IMPORTES//
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
@@ -7,12 +8,15 @@ const path = require("path");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
+const { link } = require("fs/promises");
+require("dotenv").config();
+
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Criar pastas de uploads se não existirem
+// Criar pastas de uploads de fotos se não existire
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 if (!fs.existsSync("FTperfil")) fs.mkdirSync("FTperfil");
 
@@ -38,20 +42,13 @@ const productStorage = multer.diskStorage({
 });
 const upload = multer({ storage: productStorage });
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Erlander",
-  database: "OLC",
-});
 
-//SMTP
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'nobreerlander@gmail.com',
-    pass:'aksk dhds ufjw khuw',
-  },
+// CONEXÃO COM A BD//
+const db = mysql.createConnection({
+  host: process.env.host,
+  user: process.env.user,
+  password: process.env.password,
+  database: process.env.database
 });
 
 db.connect((err) => {
@@ -59,29 +56,62 @@ db.connect((err) => {
   else console.log("Conectado ao MySQL (OLC)");
 });
 
-// Servir pastas de uploads
+
+//SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.email_user,
+    pass: process.env.email_pass
+  }
+})
+
+//envia um email de confirmação quando cira conta
+async function enviarEmail(userEmail, userName) {
+  const linkLogin = "http://localhost:3000/login/login.html";
+
+  const info = await transporter.sendMail({
+    from: `Sistema <${process.env.email.user}>`,
+    to: userEmail,
+    subject: "Conta criada com sucesso",
+    text: `Olá <${userName}> a sua conta foi cirada com sucesso!. Cliquei aqui: ${linkLogin}`,
+    html: `
+      <div> 
+      
+      
+      </div>
+    
+    `
+  })
+}
+
+
+// pastas de uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/FTperfil", express.static(path.join(__dirname, "FTperfil")));
 
+
+//MIDDLEWARE //
 function autenticar(req, res, next) {
   let token = req.headers["authorization"];
   if (!token) return res.status(403).json({ erro: "Token não fornecido" });
   if (token.startsWith("Bearer ")) token = token.slice(7);
   jwt.verify(token, "segredo", (err, decoded) => {
     if (err) return res.status(401).json({ erro: "Token inválido" });
-    // armazenar id e role do token no request para uso posterior
+    // armazenar id e role do token no request
     req.userId = decoded.id;
     req.role = decoded.role; // 'user' ou 'admin'
     next();
   });
 }
-
-// Middleware simples para autorizar apenas administradores
+// Middleware para autorizar apenas administradores
 function autorizarAdmin(req, res, next) {
   if (req.role !== "admin")
     return res.status(403).json({ erro: "Área reservada para administradores" });
   next();
 }
+
+
 
 // Verificar utilizador para recuperar senha
 app.post("/recuperar/verificar", (req, res) => {
@@ -117,6 +147,7 @@ app.post("/recuperar/alterar", async (req, res) => {
     }
   );
 });
+
 
 
 // Criar conta
@@ -177,6 +208,8 @@ app.post("/apagarConta", autenticar, (req, res) => {
   });
 });
 
+
+
 // Login
 app.post("/login", (req, res) => {
   const { email, senha } = req.body;
@@ -235,7 +268,7 @@ app.patch("/usuarios", autenticar, (req, res) => {
     }
   }
 
-  // Se for pedido remover foto, buscar a foto atual e eliminar ficheiro
+  // remover foto, buscar a foto atual e eliminar ficheiro
   if (remover_foto) {
     db.query("SELECT foto_url FROM usuarios WHERE id = ?", [userId], (err, rows) => {
       if (err) return res.status(500).json({ erro: err.message });
@@ -259,7 +292,7 @@ app.patch("/usuarios", autenticar, (req, res) => {
     return;
   }
 
-  // Construir query dinâmica para nome/descricao
+  //query dinâmica para nome/descricao
   const fields = [];
   const params = [];
   if (typeof nome === "string" && nome.trim() !== "") {
@@ -282,6 +315,8 @@ app.patch("/usuarios", autenticar, (req, res) => {
     return res.json({ msg: "Dados atualizados com sucesso" });
   });
 });
+
+
 
 // Rota administrativa: listar todos os utilizadores (apenas admins)
 app.get("/usuarios", autenticar, autorizarAdmin, (req, res) => {
@@ -335,12 +370,12 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
             ? parsed.pathname.slice(1)
             : parsed.pathname;
         } catch (e) {
-          // se não for uma URL válida, retornar como estava
+          // se URL válida, retornar como estava
           return url;
         }
       }
 
-      // 2) Apagar favoritos associados aos produtos
+      //Apagar favoritos associados aos produtos
       const deleteFavsForProducts = (cb) => {
         if (!prodIds.length) return cb();
         db.query(
@@ -354,7 +389,7 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
       };
 
       deleteFavsForProducts(() => {
-        // 3) Apagar mensagens relacionadas a esses produtos
+        // Apagar mensagens relacionadas a esses produtos
         const deleteMsgsForProducts = (done) => {
           if (!prodIds.length) return done();
           db.query(
@@ -368,7 +403,7 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
         };
 
         deleteMsgsForProducts(() => {
-          // 4) Apagar os produtos em si
+          //Apagar os produtos em si
           db.query(
             "DELETE FROM produtos WHERE vendedor = ?",
             [targetId],
@@ -392,14 +427,14 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
                 }
               });
 
-              // 5) Apagar favoritos do próprio utilizador
+              // Apagar favoritos do próprio utilizador
               db.query(
                 "DELETE FROM favoritos WHERE id_usuario = ?",
                 [targetId],
                 (err5) => {
                   if (err5) return res.status(500).json({ erro: err5.message });
 
-                  // 6) Apagar mensagens em que o utilizador é remetente ou destinatário
+                  // Apagar mensagens em que o utilizador é remetente ou destinatário
                   db.query(
                     "DELETE FROM mensagens WHERE remetente_id = ? OR destinatario_id = ?",
                     [targetId, targetId],
@@ -407,7 +442,7 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
                       if (err6)
                         return res.status(500).json({ erro: err6.message });
 
-                      // 7) Buscar foto de perfil para remover ficheiro
+                      // Buscar foto de perfil para remover ficheiro
                       db.query(
                         "SELECT foto_url FROM usuarios WHERE id = ?",
                         [targetId],
@@ -417,7 +452,7 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
                           const foto =
                             rows7 && rows7[0] ? rows7[0].foto_url : null;
 
-                          // 8) Apagar o utilizador
+                          //Apagar o utilizador
                           db.query(
                             "DELETE FROM usuarios WHERE id = ?",
                             [targetId],
@@ -468,6 +503,8 @@ app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
   );
 });
 
+
+
 // Atualizar foto de perfil
 app.post(
   "/usuarios/foto",
@@ -488,7 +525,7 @@ app.post(
   }
 );
 
-// -------------------- ROTAS DOS PRODUTOS -------------------- //
+
 
 // Criar produto
 app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
@@ -565,7 +602,7 @@ app.get("/meuProdutos", autenticar, (req, res) => {
   );
 });
 
-// -------------------- Apagar produto -------------------- //
+
 // Apagar produto, apaga tudo relacionado a esse produto
 app.delete("/produtos/:id", autenticar, (req, res) => {
   const prodId = parseInt(req.params.id);
@@ -681,7 +718,7 @@ app.delete("/produtos/:id", autenticar, (req, res) => {
   );
 });
 
-// -------------------- FAVORITOS -------------------- //
+
 
 // Adicionar produto aos favoritos
 app.post("/favoritos", autenticar, (req, res) => {
@@ -758,7 +795,8 @@ app.get("/favoritos", autenticar, (req, res) => {
   );
 });
 
-// -------------------- MENSAGENS -------------------- //
+
+
 // Listar mensagens
 app.get("/mensagens", autenticar, (req, res) => {
   const id = req.userId;
@@ -899,7 +937,7 @@ app.delete("/mensagens/conversa/:outro", autenticar, (req, res) => {
   );
 });
 
-// -------------------- SERVIDOR -------------------- //
+
 app.listen(3000, () =>
   console.log("Servidor rodando em http://localhost:3000")
 );
