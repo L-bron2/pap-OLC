@@ -18,8 +18,6 @@ window.onload = async function () {
     return;
   }
 
-  // visibility of admin area is handled by shared/admin-link.js
-
   try {
     // pega os favoritos
     const resFavoritos = await fetch("http://localhost:3000/favoritos", {
@@ -41,13 +39,13 @@ window.onload = async function () {
       return;
     }
 
-    // pegar todos os produtos
+    // listar todos os produtos
     const resProdutos = await fetch("http://localhost:3000/produtos");
     if (!resProdutos.ok) throw new Error("Erro ao carregar produtos");
 
     const todos = await resProdutos.json();
 
-    // transformar ids para número
+    // transformar ids em número
     const favoritoIdsNum = favoritoIds.map((id) => Number(id));
 
     // filtrar apenas os que tão marcados como favoritos

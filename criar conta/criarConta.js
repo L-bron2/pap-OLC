@@ -7,14 +7,20 @@ document
     const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value.trim();
 
-    //verifica se todos os campos foram peenchidos
+    // verifica se todos os campos foram preenchidos 
+    // api responde
     if (!nome || !email || !senha) {
       mostrarAlerta("Preencha todos os campos.", "#ff3b30");
       return;
     }
 
+    if (senha.length < 6) {
+      mostrarAlerta("A palavra-passe deve ter pelo menos 6 caracteres.", "#ff3b30");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/usuarios", {
+      const response = await fetch(getApiUrl(CONFIG.AUTH.CRIAR_CONTA), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, email, senha }),
@@ -30,9 +36,12 @@ document
       }
 
       if (response.ok) {
-        mostrarAlerta(result.msg || "Conta criada com sucesso!", "#5ebb42");
+        mostrarAlerta(
+          result.msg || "Conta criada com sucesso! Verifique o seu email.",
+          "#34c759"
+        );
         setTimeout(() => {
-          window.location.href = "../login/login.html"; //abre a pagina de login
+          window.location.href = "../Login/login.html";
         }, 1500);
       } else {
         mostrarAlerta(

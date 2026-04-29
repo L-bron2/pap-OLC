@@ -1,73 +1,68 @@
 :root {
-  --cor-laranja: #ff6600;
-  --cor-roxo: #8c4cff;
-  --cor-verde: #00cc66;
-  --cor-navbar-gradiente: linear-gradient(
-    135deg,
-    #2a0035,
-    #3b003d,
-    #4e0063,
-    #5c0a00
-  );
-  --cor-branco: #f5f5f5;
-  --cor-cinza-escuro: #333;
-  --cor-cinza-medio: #666;
-  --cor-vermelho: #ff3b30;
+  --fundo: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  --card: rgba(255, 255, 255, 0.84);
+  --navbar: rgba(255, 255, 255, 0.72);
+  --texto: #0f172a;
+  --texto-suave: #64748b;
+  --borda: rgba(0, 0, 0, 0.08);
+  --botao: #0f172a;
+  --botao-hover: #1e293b;
+  --sucesso: #34c759;
+  --erro: rgba(255, 59, 48, 0.92);
 }
 
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  font-family: "Raleway", "Poppins", sans-serif;
-  background: var(--cor-branco);
-  color: var(--cor-cinza-escuro);
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
 }
 
-/* NAVBAR */
 nav {
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%);
-
-  width: 92%;
-  max-width: 1100px;
+  z-index: 1000;
+  width: min(92%, 1100px);
   padding: 12px 20px;
-
   display: flex;
-  justify-content: space-between;
   align-items: center;
-
+  justify-content: space-between;
+  transform: translateX(-50%);
   background: var(--navbar);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-
-  border-radius: 18px;
   border: 1px solid var(--borda);
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* LOGO */
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--texto);
   font-size: 20px;
-  font-weight: 600;
   text-decoration: none;
-
-  transition: 0.3s ease;
+  transition: 0.2s ease;
 }
 
 .logo:hover {
   transform: scale(1.1);
 }
 
-/* LINKS */
+.logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 ul.navbar-links {
   list-style: none;
   display: flex;
@@ -75,71 +70,89 @@ ul.navbar-links {
 }
 
 ul.navbar-links li a {
+  display: grid;
+  place-items: center;
   color: var(--texto-suave);
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: 0.2s;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: 0.2s ease;
 }
 
 ul.navbar-links li a:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--texto);
 }
 
-
-/* ================= CONTAINER ================= */
 .profile-container {
-  max-width: 1200px;
+  width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 20px;
+  padding: 128px 20px 40px;
 }
 
-/* ================= GRID ================= */
 .profile-grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 30px;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 
-/* ================= CARD PERFIL ================= */
+.profile-card,
+.profile-details,
+.produto-card,
+footer {
+  background: var(--card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
+}
+
 .profile-card {
   position: relative;
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-/* ================= BTN PARA EDITAR DENTRO DO CARD ================= */
+.username-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.username-row::before {
+  content: "";
+}
+
 .editNome,
 #EditNome {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: var(--cor-roxo);
-  color: #fff;
+  grid-column: 3;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
   border: none;
+  border-radius: 12px;
+  background: var(--botao);
+  color: white;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
 }
 
-/* ================= AVATAR ================= */
 .avatar {
-  width: 160px;
-  height: 160px;
+  width: 154px;
+  height: 154px;
   border-radius: 50%;
   overflow: hidden;
-  background: #eee;
-  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--borda);
+  margin-bottom: 16px;
 }
 
 .avatar img {
@@ -148,169 +161,284 @@ ul.navbar-links li a:hover {
   object-fit: cover;
 }
 
-/* ================= TEXTO PERFIL ================= */
 .username {
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 10px;
+  grid-column: 2;
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
-.user-email {
-  font-size: 14px;
-  color: var(--cor-cinza-medio);
-  margin-top: 4px;
+.user-email,
+.user-since,
+.bio {
+  color: var(--texto-suave);
+  line-height: 1.6;
 }
 
-.user-since {
-  font-size: 13px;
-  color: var(--cor-cinza-medio);
-  margin-top: 6px;
-}
-
-/* ================= BOTÕES PERFIL ================= */
 .edit-actions {
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 22px;
 }
 
 .btn {
-  padding: 12px;
-  border-radius: 10px;
+  min-height: 44px;
+  padding: 0 14px;
   border: none;
-  font-weight: 700;
+  border-radius: 12px;
+  font-weight: 800;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.btn-edit {
-  background: linear-gradient(135deg, var(--cor-roxo), var(--cor-laranja));
-  color: #fff;
+.btn-edit,
+#btnAtualizarFoto,
+.btn-save,
+.btn-criar-produto {
+  background: var(--botao) !important;
+  color: white !important;
 }
 
-.btn-logout {
-  background: #f3f4f6;
+.btn:hover {
+  transform: translateY(-1px);
 }
 
-/* ================= DETALHES ================= */
+.btn-edit:hover,
+#btnAtualizarFoto:hover,
+.btn-save:hover,
+.btn-criar-produto:hover {
+  background: var(--botao-hover) !important;
+}
+
+.btn-logout,
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+}
+
+.btn-remove,
+#btnRemoverFoto,
+.btn-delete {
+  background: rgba(255, 59, 48, 0.12) !important;
+  color: #c2271f !important;
+}
+
 .profile-details {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  padding: 28px;
 }
 
 .section-title {
-  font-size: 20px;
-  font-weight: 700;
   margin-bottom: 10px;
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
-.bio {
-  color: var(--cor-cinza-medio);
-  margin-bottom: 16px;
+.produtos-section {
+  margin-top: 24px;
 }
 
-/* ================= PRODUTOS ================= */
 .produtos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 18px;
 }
 
 .produto-card {
-  background: #fff;
-  border-radius: 12px;
   padding: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
 .produto-card img {
   width: 100%;
-  height: 140px;
+  height: 150px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .produto-titulo {
-  font-weight: 700;
-  margin-top: 8px;
+  margin-top: 10px;
+  font-weight: 800;
 }
 
 .produto-preco {
-  color: var(--cor-verde);
-  font-weight: 700;
   margin-top: 4px;
+  color: var(--sucesso);
+  font-weight: 800;
 }
 
-/* ================= APAGAR CONTA ================= */
+.edit-area {
+  margin-top: 18px;
+}
+
+.edit-area textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 14px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  resize: vertical;
+  outline: none;
+}
+
+.save-cancel {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .apagarConta {
   position: fixed;
-  bottom: 24px;
   right: 24px;
-  z-index: 2000;
+  bottom: 24px;
+  z-index: 1200;
 }
 
 .apagarConta button {
+  display: grid;
+  place-items: center;
   width: 56px;
   height: 56px;
-  border-radius: 50%;
-  background: var(--cor-vermelho);
   border: none;
-  color: #fff;
+  border-radius: 16px;
+  background: var(--erro);
+  color: white;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  box-shadow: 0 14px 30px rgba(255, 59, 48, 0.28);
 }
 
-/* ================= RODAPÉ ================= */
+.apagarConta a {
+  color: inherit;
+}
+
 footer {
-  margin-top: 40px;
-  padding: 28px 16px;
-  background: #f0f0f3;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.rodape {
-  max-width: 1100px;
-  margin: 0 auto;
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto 40px;
+  padding: 24px;
   text-align: center;
-  color: var(--cor-cinza-medio);
-  font-size: 14px;
+  color: var(--texto-suave);
   line-height: 1.6;
 }
 
-.rodape p {
+footer strong {
+  color: var(--texto);
+}
+
+.alerta {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  z-index: 2000;
+  max-width: 90vw;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--erro);
+  color: white;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: 0.3s ease;
+}
+
+.alerta.mostrar {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.confirmar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.confirmar-caixa {
+  width: min(420px, 100%);
+  padding: 26px;
+  background: var(--card);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.22);
+}
+
+.confirmar-caixa h2 {
   margin-bottom: 10px;
+  font-size: 1.35rem;
 }
 
-.rodape strong {
-  color: var(--cor-cinza-escuro);
-  font-weight: 600;
+.confirmar-caixa p {
+  color: var(--texto-suave);
+  line-height: 1.6;
 }
 
-/* separador visual subtil */
-.rodape p:not(:last-child)::after {
-  content: "";
-  display: block;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--cor-roxo),
-    var(--cor-laranja)
-  );
-  margin: 14px auto;
-  border-radius: 4px;
+.confirmar-acoes {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
 }
 
-/* ================= RESPONSIVIDADE ================= */
-@media (max-width: 900px) {
+.confirmar-acoes button {
+  flex: 1;
+  min-height: 44px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.confirmar-cancelar {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--texto);
+  border: 1px solid var(--borda) !important;
+}
+
+.confirmar-confirmar {
+  background: var(--erro);
+  color: white;
+}
+
+@media (max-width: 860px) {
+  nav {
+    top: 10px;
+    width: 95%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  ul.navbar-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .profile-container {
+    padding-top: 150px;
+  }
+
   .profile-grid {
     grid-template-columns: 1fr;
   }
 
-  .profile-card {
-    align-items: center;
+}
+
+@media (max-width: 520px) {
+  .profile-container {
+    padding-inline: 12px;
+  }
+
+  .profile-card,
+  .profile-details {
+    padding: 20px;
+  }
+
+  .save-cancel {
+    flex-direction: column;
   }
 }

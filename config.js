@@ -1,7 +1,3 @@
-// ================== CONFIGURAÇÃO GLOBAL ================== //
-// Este arquivo centraliza todas as URLs e configurações da aplicação
-// Altere aqui se o servidor mudar de endereço
-
 const CONFIG = {
   API_BASE_URL: "http://localhost:3000",
   
@@ -11,6 +7,7 @@ const CONFIG = {
     CRIAR_CONTA: "/usuarios",
     GET_USUARIO: "/usuarios/id",
     GET_USUARIO_PUBLICO: (id) => `/usuarios/${id}`,
+    RECUPERAR_PEDIR_EMAIL: "/recuperar/pedir-email",
     RECUPERAR_VERIFICAR: "/recuperar/verificar",
     RECUPERAR_ALTERAR: "/recuperar/alterar",
   },

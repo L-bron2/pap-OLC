@@ -1,5 +1,4 @@
 async function fetchJson(url, opts = {}) {
-  // Usa base absoluta para evitar problemas quando a página for aberta via file://
   const base = "http://localhost:3000";
   if (url.startsWith("/")) url = base + url;
   const token = localStorage.getItem("token");
@@ -8,7 +7,6 @@ async function fetchJson(url, opts = {}) {
 
   const res = await fetch(url, opts);
   if (!res.ok) {
-    // tentar extrair mensagem JSON do servidor, cair para statusText se falhar
     try {
       const body = await res.json();
       throw new Error(body.erro || body.msg || res.statusText);
@@ -25,8 +23,8 @@ function montarUserCard(u) {
   div.dataset.userid = u.id;
   div.innerHTML = `<div class="meta"><strong>${u.nome}</strong></div>
     <div class="small">${u.email || ""} • id:${u.id} • ${
-    u.role || "user"
-  }</div>`;
+      u.role || "user"
+    }</div>`;
   return div;
 }
 
@@ -51,7 +49,7 @@ function filtrar(text) {
   list.innerHTML = "";
   users
     .filter((u) =>
-      `${u.nome} ${u.email} ${u.id} ${u.role}`.toLowerCase().includes(q)
+      `${u.nome} ${u.email} ${u.id} ${u.role}`.toLowerCase().includes(q),
     )
     .forEach((u) => list.appendChild(montarUserCard(u)));
 }
@@ -100,10 +98,16 @@ async function mostrarDetalhes(userId) {
     pList.innerHTML = "Erro ao carregar produtos";
   }
 
-  // configurar botão apagar conta
+  // botão apagar conta
   const btn = document.getElementById("deleteUser");
   btn.onclick = async () => {
-    if (!confirm("Apagar conta e todos os dados associados?")) return;
+    const confirmado = await confirmarAcao({
+      titulo: "Apagar conta?",
+      mensagem:
+        "Esta acao apaga a conta e todos os dados associados. Nao sera possivel recuperar depois.",
+      confirmarTexto: "Apagar conta",
+    });
+    if (!confirmado) return;
     try {
       await fetchJson(`/usuarios/${userId}`, { method: "DELETE" });
       mostrarAlerta("Conta apagada", "#5ebb42");
@@ -132,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   } catch (e) {
-    // mostrar a mensagem real do erro (ex: token inválido / expirado)
+    // mensagem de erro
     try {
       mostrarAlerta(e.message || "Sessão inválida", "#ff3b30");
     } catch (e2) {
@@ -155,27 +159,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarDetalhes(Number(id));
   });
 
-  // delegação para apagar produto
+  // apagar produto
   document
     .getElementById("userProducts")
     .addEventListener("click", async (e) => {
       const btn = e.target.closest("button[data-prod]");
       if (!btn) return;
       const prodId = btn.dataset.prod;
-      if (!confirm("Apagar produto id:" + prodId + "?")) return;
+      const confirmado = await confirmarAcao({
+        titulo: "Apagar produto?",
+        mensagem: `Tem a certeza que pretende apagar o produto id:${prodId}?`,
+        confirmarTexto: "Apagar produto",
+      });
+      if (!confirmado) return;
       try {
         await fetchJson(`/produtos/${prodId}`, { method: "DELETE" });
         mostrarAlerta("Produto apagado", "#5ebb42");
-        // refrescar detalhe atual
+        // detalhe
         const currentId = Number(
-          document.getElementById("detailName").dataset.userid || 0
+          document.getElementById("detailName").dataset.userid || 0,
         );
         if (currentId) mostrarDetalhes(currentId);
       } catch (err) {
         mostrarAlerta(err.message || "Erro", "#ff3b30");
       }
     });
-  // botão para fechar o painel de detalhe (painel direito)
+  // botão para fechar o painel de detalhe
   const closeBtn = document.getElementById("fecharDetalhes");
   if (closeBtn) {
     closeBtn.addEventListener("click", (ev) => {

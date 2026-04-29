@@ -1,167 +1,169 @@
 :root {
-  --cor-laranja: #ff6600;
-  --cor-roxo: #8c4cff;
-  --cor-cinza-escuro: #333333;
-  --cor-branco: #f5f5f5;
-  --cor-vermelho: #ff3b30;
+  --fundo: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  --card: rgba(255, 255, 255, 0.84);
+  --navbar: rgba(255, 255, 255, 0.72);
+  --texto: #0f172a;
+  --texto-suave: #64748b;
+  --borda: rgba(0, 0, 0, 0.08);
+  --botao: #0f172a;
+  --botao-hover: #1e293b;
+  --erro: rgba(255, 59, 48, 0.94);
 }
 
-/* Reset e corpo */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  background-color: var(--cor-branco);
-  color: var(--cor-cinza-escuro);
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+.container {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative;
+  justify-content: center;
+  padding: 120px 20px 40px;
 }
-
 
 .main {
-  background-color: var(--cor-branco);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px; 
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 100%;
-  transition: transform 0.3s, box-shadow 0.3s;
+  width: min(100%, 520px);
+  padding: 44px;
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.6s ease;
 }
 
-.main:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
-  font-size: 1.8rem;
+  margin-bottom: 10px;
+  font-size: clamp(1.6rem, 4vw, 2rem);
   text-align: center;
 }
 
-/* Formulário */
-.recuperarSenhaBox form {
+.texto-ajuda {
+  margin: 0 auto 24px;
+  max-width: 420px;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.recuperarSenhaBox form,
+.campoSenha {
   display: flex;
   flex-direction: column;
-  gap: 15px; 
+  gap: 14px;
   width: 100%;
 }
 
 .input {
   width: 100%;
-  height: 60px;
+  height: 58px;
   border-radius: 12px;
-  border: 2px solid var(--cor-roxo);
-  padding: 0 20px;
-  font-size: 16px;
-  transition: all 0.3s ease;
+  border: 1px solid var(--borda);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0 16px;
+  font-size: 15px;
+  color: var(--texto);
+  transition: 0.2s ease;
 }
 
 .input:focus {
-  border-color: var(--cor-laranja);
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
   outline: none;
-  box-shadow: 0 0 8px rgba(255, 102, 0, 0.5);
 }
 
-/* Botões */
 .BTN {
   width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, var(--cor-laranja), var(--cor-roxo));
-  color: var(--cor-branco);
+  min-height: 52px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 12px;
+  background: var(--botao);
+  color: white;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.2s ease;
 }
 
 .BTN:hover {
-  transform: scale(1.03);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background: var(--botao-hover);
+  transform: translateY(-1px);
 }
 
-/* Botão voltar*/
 .BTN_voltar {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 22px;
+  left: 22px;
+  display: grid;
+  place-items: center;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  background: var(--cor-laranja);
-  color: white;
+  border-radius: 14px;
+  background: var(--navbar);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--borda);
+  color: var(--texto);
   text-decoration: none;
   font-size: 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: 0.2s ease;
 }
 
 .BTN_voltar:hover {
-  background: var(--cor-roxo);
-  transform: scale(1.1);
+  transform: translateY(-1px);
+  background: white;
 }
 
-/* Alerta */
 .alerta {
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--cor-vermelho);
-  color: white;
-  padding: 16px 22px;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  min-width: 260px;
-  max-width: 90vw;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s, transform 0.4s;
   z-index: 2000;
-  font-weight: 500;
+  max-width: 90vw;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--erro);
+  color: white;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: 0.3s ease;
 }
 
 .alerta.mostrar {
   opacity: 1;
   transform: translateX(-50%) translateY(10px);
-  pointer-events: auto;
 }
 
-.alerta .fechar {
-  position: absolute;
-  right: 10px;
-  top: 6px;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.2em;
-  cursor: pointer;
-}
-
-/* Responsividade */
-@media (max-width: 500px) {
-  .main {
-    padding: 25px 20px;
-    max-width: 95vw;
+@media (max-width: 520px) {
+  .container {
+    align-items: flex-start;
+    padding-top: 96px;
   }
 
-  h1 {
-    font-size: 1.5rem;
+  .main {
+    padding: 30px 20px;
   }
 }

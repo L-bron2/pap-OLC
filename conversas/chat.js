@@ -11,7 +11,7 @@ window.onload = async function () {
     mostrarAlerta("Faça login para poder acessar a essa página!");
     return setTimeout(
       () => (window.location.href = "../Login/login.html"),
-      1500
+      1500,
     );
   }
 
@@ -67,7 +67,7 @@ window.onload = async function () {
         .sort((a, b) => b.data - a.data);
 
       entradas.forEach((e) =>
-        atualizarOuCriarConversa(e.uid, e.nome, e.ultimo)
+        atualizarOuCriarConversa(e.uid, e.nome, e.ultimo),
       );
     } catch (err) {
       mostrarAlerta(err.message);
@@ -93,24 +93,25 @@ window.onload = async function () {
       </div>
     `;
 
-    // ligar o botão de apagar (impede propagação para não abrir a conversa)
+    // ligar o botão de apagar handler para não abrir a conversa
     const delBtn = existente.querySelector(".apagar-btn");
     if (delBtn) {
       delBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (
-          !confirm(
-            "Apagar todas as mensagens desta conversa? Esta ação é irreversível."
-          )
-        )
-          return;
+        const confirmado = await confirmarAcao({
+          titulo: "Apagar conversa?",
+          mensagem:
+            "Apagar todas as mensagens desta conversa? Esta acao e irreversivel.",
+          confirmarTexto: "Apagar conversa",
+        });
+        if (!confirmado) return;
         try {
           const r = await fetch(
             `http://localhost:3000/mensagens/conversa/${outroId}`,
             {
               method: "DELETE",
               headers: { Authorization: "Bearer " + token },
-            }
+            },
           );
           const body = await r.json().catch(() => ({}));
           if (!r.ok) {
@@ -118,14 +119,14 @@ window.onload = async function () {
             return mostrarAlerta(
               `${body.erro || body.msg || "Falha ao apagar conversa"} (status ${
                 r.status
-              })`
+              })`,
             );
           }
 
           console.log("DELETE conversa success", body);
           mostrarAlerta(body.msg || "Conversa apagada com sucesso", "#00cc66");
 
-          // se a conversa apagada estava ativa, limpar área
+          // se a conversa apagada tiver aberta, limpar área
           if (conversaAtiva === Number(outroId)) {
             conversaAtiva = null;
             chatUserName.textContent = "Selecione uma conversa";
@@ -162,7 +163,7 @@ window.onload = async function () {
     atualizarOuCriarConversa(
       outroId,
       nome || "Vendedor",
-      "Sem mensagens ainda"
+      "Sem mensagens ainda",
     );
   }
 
@@ -175,7 +176,7 @@ window.onload = async function () {
       .querySelectorAll(".conversa-item")
       .forEach((it) => it.classList.remove("ativa"));
     const atual = listaConversas.querySelector(
-      `[data-uid="${String(outroId)}"]`
+      `[data-uid="${String(outroId)}"]`,
     );
     if (atual) atual.classList.add("ativa");
     carregarMensagensConversa();
@@ -189,7 +190,7 @@ window.onload = async function () {
         `http://localhost:3000/mensagens/conversa/${conversaAtiva}`,
         {
           headers: { Authorization: "Bearer " + token },
-        }
+        },
       );
       if (!r.ok) throw new Error("Falha ao carregar mensagens");
       const msgs = await r.json();
@@ -323,11 +324,11 @@ window.onload = async function () {
       showProductPreview(
         produtoTituloParam ? decodeURIComponent(produtoTituloParam) : null,
         produtoPrecoParam ? decodeURIComponent(produtoPrecoParam) : null,
-        produtoImgParam ? decodeURIComponent(produtoImgParam) : null
+        produtoImgParam ? decodeURIComponent(produtoImgParam) : null,
       );
     } else {
       fetch(
-        `http://localhost:3000/usuarios/${encodeURIComponent(vendedorQuery)}`
+        `http://localhost:3000/usuarios/${encodeURIComponent(vendedorQuery)}`,
       )
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((data) => abrirConversa(vendedorQuery, data.nome || "Vendedor"))

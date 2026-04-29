@@ -94,42 +94,48 @@ window.onload = async function () {
 
   async function alternarFavorito(produtoId) {
     if (!token) {
-      mostrarAlerta("Faça login para favoritar produtos", "#ff9500");
+      mostrarAlerta("Faca login para favoritar produtos", "#ff9500");
+      return;
+    }
+
+    const idNormalizado = Number(produtoId);
+    if (!idNormalizado) {
+      mostrarAlerta("Produto invalido", "#ff3b30");
       return;
     }
 
     try {
-      const estaFavoritado = listaFavoritos.includes(produtoId);
-      const metodo = estaFavoritado ? "DELETE" : "POST";
+      const estaFavoritado = listaFavoritos.map(Number).includes(idNormalizado);
+      const url = estaFavoritado
+        ? `http://localhost:3000/favoritos/${idNormalizado}`
+        : "http://localhost:3000/favoritos";
 
-      const resposta = await fetch("http://localhost:3000/favoritos", {
-        method: metodo,
+      const resposta = await fetch(url, {
+        method: estaFavoritado ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify({ produto_id: produtoId }),
+        body: estaFavoritado
+          ? undefined
+          : JSON.stringify({ produto_id: idNormalizado }),
       });
 
-      if (resposta.ok) {
-        if (estaFavoritado) {
-          listaFavoritos = listaFavoritos.filter((id) => id !== produtoId);
-        } else {
-          listaFavoritos.push(produtoId);
-        }
-        carregarProdutosPagina(paginaAtual);
+      if (!resposta.ok) throw new Error("Falha na API");
 
-        const mensagem = estaFavoritado
-          ? "💔 Removido dos favoritos"
-          : "❤️ Adicionado aos favoritos!";
-        mostrarAlerta(
-          mensagem,
-          estaFavoritado ? "#ff9500" : "#34c759",
-          estaFavoritado ? "aviso" : "sucesso",
+      if (estaFavoritado) {
+        listaFavoritos = listaFavoritos.filter(
+          (id) => Number(id) !== idNormalizado,
         );
       } else {
-        throw new Error("Falha na API");
+        listaFavoritos.push(idNormalizado);
       }
+
+      carregarProdutosPagina(paginaAtual);
+      mostrarAlerta(
+        estaFavoritado ? "Removido dos favoritos" : "Adicionado aos favoritos!",
+        estaFavoritado ? "#ff9500" : "#34c759",
+      );
     } catch (erro) {
       console.error(erro);
       mostrarAlerta("Erro ao atualizar favoritos", "#ff3b30");
@@ -157,10 +163,11 @@ window.onload = async function () {
     const elementosProdutos = produtosPagina.map((produto) => {
       const div = document.createElement("div");
       div.classList.add("produto");
-      const estaFavoritado = listaFavoritos.includes(produto.id || produto._id);
+      const idProduto = Number(produto.id || produto._id);
+      const estaFavoritado = listaFavoritos.map(Number).includes(idProduto);
 
       div.innerHTML = `
-        <button class="favoritoBTN ${estaFavoritado ? "favorito-ativo" : ""}" data-id-produto="${produto.id || produto._id}">
+        <button class="favoritoBTN ${estaFavoritado ? "favorito-ativo" : ""}" data-id-produto="${idProduto}">
           <span class="material-symbols-outlined">${estaFavoritado ? "favorite" : "favorite_border"}</span>
         </button>
         ${
@@ -286,7 +293,7 @@ window.onload = async function () {
         mostrarAlerta("Faça login para conversar", "#ff9500", "aviso");
         return;
       }
-      window.location.href = `../conversas/chat.html?seller=${produto.usuario_id || ""}`;
+      window.location.href = `../conversas/chat.html?vendedor=${produto.usuario_id || produto.vendedor || ""}`;
       modalProduto.style.display = "none";
     };
   }
@@ -313,70 +320,58 @@ window.onload = async function () {
     }
   }
 
-  // Botão filtro
+  // Mostra o modal de filtros proprio,
   botaoFiltro.addEventListener("click", async (e) => {
     e.stopPropagation();
-    limparModal();
-    modalProduto.classList.add("compacto");
-    modalProduto.style.display = "flex";
-
-    tituloModal.textContent = "🔍 Filtros";
-    descricaoModal.innerHTML = `
-      <form class="filtro-form">
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div>
-            <label for="categoriaFiltro">Categoria</label>
-            <select id="categoriaFiltro"></select>
-          </div>
-          <div class="filtro-row">
-            <div>
-              <label for="precoMinimo">Mínimo (€)</label>
-              <input type="number" id="precoMinimo" min="0" step="0.01" placeholder="0">
-            </div>
-            <div>
-              <label for="precoMaximo">Máximo (€)</label>
-              <input type="number" id="precoMaximo" min="0" step="0.01" placeholder="∞">
-            </div>
-          </div>
-        </div>
-      </form>
-    `;
-    botaoModal.textContent = "Aplicar";
-
+    modalFiltro.style.display = "flex";
     await carregarCategorias("categoriaFiltro");
-
-    botaoModal.onclick = () => {
-      const categoria = document.getElementById("categoriaFiltro").value;
-      const minimo =
-        parseFloat(document.getElementById("precoMinimo").value) || 0;
-      const maximo =
-        parseFloat(document.getElementById("precoMaximo").value) || Infinity;
-
-      produtosFiltrados = todosProdutos.filter((p) => {
-        let valido = true;
-        if (categoria && p.categoria !== categoria) valido = false;
-        if (p.preco !== undefined && (p.preco < minimo || p.preco > maximo))
-          valido = false;
-        return valido;
-      });
-
-      paginaAtual = 1;
-      carregarProdutosPagina(paginaAtual);
-      carregarPaginacao();
-      modalProduto.style.display = "none";
-      modalProduto.classList.remove("compacto");
-
-      mostrarAlerta(
-        produtosFiltrados.length > 0
-          ? `${produtosFiltrados.length} produto(s)`
-          : "Nenhum resultado",
-        produtosFiltrados.length > 0 ? "#34c759" : "#ff9500",
-        produtosFiltrados.length > 0 ? "sucesso" : "aviso",
-      );
-    };
   });
 
-  // Pesquisa com debounce
+  fecharFiltro.addEventListener("click", () => {
+    modalFiltro.style.display = "none";
+  });
+
+  modalFiltro.addEventListener("click", (e) => {
+    if (e.target === modalFiltro) modalFiltro.style.display = "none";
+  });
+
+  limparFiltrosBtn.addEventListener("click", () => {
+    document.getElementById("categoriaFiltro").value = "";
+    document.getElementById("precoMinimo").value = "";
+    document.getElementById("precoMaximo").value = "";
+    produtosFiltrados = [];
+    paginaAtual = 1;
+    carregarProdutosPagina(paginaAtual);
+    carregarPaginacao();
+    modalFiltro.style.display = "none";
+  });
+
+  aplicarFiltrosBtn.addEventListener("click", () => {
+    const categoria = document.getElementById("categoriaFiltro").value;
+    const minimo = parseFloat(document.getElementById("precoMinimo").value) || 0;
+    const maximo = parseFloat(document.getElementById("precoMaximo").value) || Infinity;
+
+    produtosFiltrados = todosProdutos.filter((p) => {
+      const preco = Number(p.preco) || 0;
+      if (categoria && p.categoria !== categoria) return false;
+      if (preco < minimo || preco > maximo) return false;
+      return true;
+    });
+
+    paginaAtual = 1;
+    carregarProdutosPagina(paginaAtual);
+    carregarPaginacao();
+    modalFiltro.style.display = "none";
+
+    mostrarAlerta(
+      produtosFiltrados.length > 0
+        ? `${produtosFiltrados.length} produto(s) encontrado(s)`
+        : "Nenhum resultado encontrado",
+      produtosFiltrados.length > 0 ? "#34c759" : "#ff9500",
+    );
+  });
+
+  // Pesquisa 
   const pesquisaAguardada = aguardarPesquisa(() => {
     const termo = normalizarTexto(campoPesquisa.value);
 

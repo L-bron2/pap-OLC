@@ -1,15 +1,4 @@
-const loading = document.getElementById("Loading")
-// Mostrar loading
-function mostrarLoading() {
-  loading.style.display = "flex";
-  produtosContainer.innerHTML = "";
-}
-
-// Esconder loading
-function esconderLoading() {
-  loading.style.display = "none";
-}
-
+// Trata o envio do formulario de login e guarda o token JWT devolvido pela API.
 document
   .getElementById("formLogin")
   .addEventListener("submit", async function (e) {
@@ -18,7 +7,7 @@ document
     const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("palavra-passe").value.trim();
 
-    //verifica se os campos tão preenchidos
+    // verifica se os campos tão preenchidos
     if (!email || !senha) {
       mostrarAlerta("Preencha todos os campos.", "#ff3b30");
       return;
@@ -35,24 +24,23 @@ document
       try {
         result = await response.json();
       } catch (jsonError) {
-        mostrarAlerta("Erro no servidor. Resposta inválida.");
-        console.error("JSON inválido:", jsonError);
+        mostrarAlerta("Erro no servidor. Resposta invalida.", "#ff3b30");
+        console.error("JSON invalido:", jsonError);
         return;
       }
 
       if (response.ok) {
-        // salvar token no localStorage
         localStorage.setItem("token", result.token);
-        window.location.href = "../inicio/inicio.html"; // redireciona para a página inicial
+        window.location.href = "../inicio/inicio.html";
       } else {
         mostrarAlerta(
-          result.erro || result.err || "Email ou palavra passe incorreto",
+          result.erro || result.err || "Email ou palavra-passe incorretos",
           "#ff3b30",
         );
       }
     } catch (error) {
       mostrarAlerta(
-        "Erro de conexão com o servidor: " + error.message,
+        "Erro de conexao com o servidor: " + error.message,
         "#ff3b30",
       );
       console.error("Erro fetch login:", error);

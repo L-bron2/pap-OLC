@@ -42,18 +42,17 @@ async function carregarPerfil() {
       if (dataRaw) dataFmt = new Date(dataRaw).toLocaleDateString();
     } catch {}
 
-    // suportar vários IDs/seletores para o botão de editar nome
-    const editarNome =
-      document.getElementById("editarNome") ||
-      document.getElementById("EditNome") ||
-      document.querySelector(".editNome");
-
     // card utilizador
     const profileCard = document.getElementById("profileCard");
     if (profileCard) {
       profileCard.innerHTML = `
                 <div class="avatar"><img id="avatarImg" src="${foto}" alt=""></div>
-                <div class="username">${nome}</div>
+                <div class="username-row">
+                    <div class="username">${nome}</div>
+                    <button class="editNome" id="EditNome" type="button" title="Alterar nome">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                </div>
                 <div class="user-email">${email}</div>
                 <div class="user-since">Desde: ${dataFmt}</div>
                 <div class="edit-actions">
@@ -73,6 +72,9 @@ async function carregarPerfil() {
       inputImagem.style.display = "none";
       profileCard.appendChild(inputImagem);
     }
+
+    // O botao de editar nome 
+    const editarNome = document.getElementById("EditNome");
 
     // editar nome
     if (editarNome) {
@@ -157,11 +159,11 @@ async function carregarPerfil() {
               btnApagar.innerText = "Apagar";
               btnApagar.addEventListener("click", async (e) => {
                 e.stopPropagation();
-
-                //confirmação do utilizador
-                const confirmar = confirm(
-                  `Deseja apagar o produto "${produto.titulo}"? Esta ação é irreversível.`
-                );
+                const confirmar = await confirmarAcao({
+                  titulo: "Apagar produto?",
+                  mensagem: `Deseja apagar o produto "${produto.titulo}"? Esta acao e irreversivel.`,
+                  confirmarTexto: "Apagar produto",
+                });
                 if (!confirmar) {
                   mostrarAlerta("Ação cancelada", "#ffb84d");
                   return;
@@ -258,7 +260,7 @@ async function carregarPerfil() {
       });
     }
 
-    // Botão apagar conta (lidar com possíveis duplicados no HTML)
+    // Botão apagar conta 
     const apagarContaEl = document.getElementById("apagarConta");
     let apagarContaBtn = null;
     if (apagarContaEl) {
@@ -267,9 +269,11 @@ async function carregarPerfil() {
     }
     if (apagarContaBtn) {
       apagarContaBtn.addEventListener("click", async () => {
-        const confirmar = confirm(
-          "Tem certeza que deseja apagar a sua conta? Esta ação é irreversível e irá:\n- Remover todos os seus produtos\n- Remover todas as suas mensagens\n- Remover todos os seus favoritos\n- Apagar a sua conta permanentemente"
-        );
+        const confirmar = await confirmarAcao({
+          titulo: "Apagar conta?",
+          mensagem: "Esta acao e irreversivel e vai remover os seus produtos, mensagens, favoritos e a conta permanentemente.",
+          confirmarTexto: "Apagar conta",
+        });
         if (!confirmar) {
           mostrarAlerta("Ação cancelada", "#ffb84d");
           return;
@@ -359,7 +363,11 @@ async function carregarPerfil() {
     // remover foto
     if (btnRemoverFoto) {
       btnRemoverFoto.addEventListener("click", async () => {
-        const confirmar = confirm("Deseja remover a sua foto de perfil?");
+        const confirmar = await confirmarAcao({
+          titulo: "Remover foto?",
+          mensagem: "Deseja remover a sua foto de perfil?",
+          confirmarTexto: "Remover foto",
+        });
         if (!confirmar) return;
         try {
           const resp = await fetch("http://localhost:3000/usuarios", {

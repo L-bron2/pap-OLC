@@ -16,7 +16,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
 body {
@@ -34,8 +35,7 @@ body {
   min-height: 400px;
   padding: 20px;
   left: 43%;
-  top: 23%; 
-
+  top: 23%;
 }
 
 .loading-spinner {
@@ -51,8 +51,12 @@ body {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* NAVBAR */
@@ -78,7 +82,6 @@ nav {
 
 .logo {
   font-size: 20px;
-  font-weight: 600;
   text-decoration: none;
   color: var(--texto);
   transition: 0.2s ease;
@@ -88,10 +91,22 @@ nav {
   transform: scale(1.1);
 }
 
+.logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 ul.navbar-links {
   list-style: none;
   display: flex;
   gap: 14px;
+}
+
+nav > .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 ul.navbar-links li a {
@@ -111,6 +126,7 @@ ul.navbar-links li a:hover {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .Procurar {
@@ -128,7 +144,6 @@ ul.navbar-links li a:hover {
   border-color: rgba(0, 0, 0, 0.2);
   box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
 }
-
 
 /* PRODUTOS */
 .Produtos {
@@ -376,7 +391,6 @@ ul.navbar-links li a:hover {
   color: var(--sucesso);
 }
 
-
 .BTN {
   padding: 12px 24px;
   border-radius: 12px;
@@ -585,7 +599,8 @@ ul.navbar-links li a:hover {
   border-top: 1px solid var(--borda);
 }
 
-.btn-primario, .btn-secundario {
+.btn-primario,
+.btn-secundario {
   flex: 1;
   height: 48px;
   border: none;
@@ -636,16 +651,16 @@ ul.navbar-links li a:hover {
     max-width: calc(100% - 20px);
     border-radius: 16px;
   }
-  
+
   .filtro-precos {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .filtro-header {
     padding: 20px 20px 0 20px;
   }
-  
+
   .filtro-form {
     padding: 0 20px 24px 20px;
   }
@@ -670,7 +685,40 @@ ul.navbar-links li a:hover {
   background: rgba(15, 23, 42, 0.3);
 }
 
-.btn-primario, .btn-secundario {
+/* Ajuste final do modal de filtros para acompanhar o estilo glass do login. */
+.modal-filtro {
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.filtro-container {
+  background: var(--card);
+  border-radius: 18px;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.18);
+}
+
+.filtro-header h3 {
+  background: none;
+  -webkit-text-fill-color: var(--texto);
+  color: var(--texto);
+}
+
+.filtro-campo select,
+.filtro-campo input {
+  border: 1px solid var(--borda);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.filtro-campo select:focus,
+.filtro-campo input:focus {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  transform: none;
+}
+
+.btn-primario,
+.btn-secundario {
   flex: 1;
   height: 44px;
   border: none;
@@ -746,7 +794,13 @@ ul.navbar-links li a:hover {
 
   .nav-right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  ul.navbar-links {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .Procurar {
@@ -774,10 +828,11 @@ ul.navbar-links li a:hover {
   }
 
   .BTN_Produto {
-    width: 140px;
+    width: 52px;
     height: 44px;
     right: 20px;
     bottom: 20px;
+    overflow: hidden;
   }
 
   .Pages {
@@ -796,7 +851,12 @@ ul.navbar-links li a:hover {
   }
 
   .Produtos {
-    margin-top: 160px;
+    margin-top: 190px;
     padding: 0 10px;
+  }
+
+  .Procurar {
+    width: calc(100% - 56px);
+    min-width: 0;
   }
 }

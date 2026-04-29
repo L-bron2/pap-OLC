@@ -1,60 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="CriarConta.css" />
-    <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
-    <title>Criar conta</title>
-  </head>
-  <body>
-    <div class="login">
-      <nav>
-        <a href="#" class="logo">Trovix</a>
-        <ul class="navbar-links">
-          <li><a href="../Login/login.html">Login</a></li>
-        </ul>
-      </nav>
 
-      <div class="login_box">
-        <h1>Criar conta</h1>
-        <!-- Formulário para criação de conta -->
-        <form id="DadosConta">
-          <input
-            type="text"
-            id="nome"
-            class="input"
-            placeholder="Nome"
-            required
-          />
-          <input
-            type="email"
-            id="email"
-            class="input"
-            placeholder="Ex: meuemail@gmail.com"
-            required
-          />
-          <input
-            type="password"
-            id="senha"
-            class="input"
-            placeholder="Palavra passe"
-            required
-          />
-          <a href="../Login/login.html">Já tem uma conta? Faça login!</a>
-          <button type="submit" class="BTN">Criar conta</button>
-        </form>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="CriarConta.css" />
+  <link rel="icon" href="../favicon/Favicon final.png" type="image/x-icon" />
+  <title>Criar conta</title>
+</head>
 
-      <!-- Botão de voltar -->
-      <a href="../Login/login.html" class="BTN_voltar"> &#8592; </a>
+<body>
+  <div class="login">
+    <nav>
+      <a href="../inicio/inicio.html" class="logo">
+        <img src="../favicon/Favicon final.png" alt="Logo Trovix" />
+        <span>Trovix</span>
+      </a>
+      <ul class="navbar-links">
+        <li><a href="../Login/login.html">Login</a></li>
+      </ul>
+    </nav>
 
-      <!-- alerta -->
-      <div id="alerta" class="alerta" style="display: none"></div>
+    <div class="login_box">
+      <h1>Criar conta</h1>
+      <!-- Formulário para criar  conta -->
+      <form id="DadosConta">
+        <input type="text" id="nome" class="input" placeholder="Nome" required />
+        <input type="email" id="email" class="input" placeholder="Ex: meuemail@gmail.com" required />
+        <input type="password" id="senha" class="input" placeholder="Palavra passe" required />
+        <a href="../Login/login.html">Já tem uma conta? Faça login!</a>
+        <button type="submit" class="BTN">Criar conta</button>
+      </form>
     </div>
 
-    <script src="../config.js"></script>
-    <script src="../shared/alerts.js"></script>
-    <script src="criarConta.js"></script>
-  </body>
+    <!-- alerta -->
+    <div id="alerta" class="alerta" style="display: none"></div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="../shared/alerts.js"></script>
+  <script src="criarConta.js"></script>
+</body>
+
 </html>
