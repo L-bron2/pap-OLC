@@ -50,7 +50,7 @@ const db = mysql.createConnection({
   host: process.env.host,
   user: process.env.user,
   password: process.env.password,
-  database: process.env.database,
+  database: process.env.database
 });
 
 db.connect((err) => {
@@ -1101,11 +1101,11 @@ app.delete("/mensagens/conversa/:outro", autenticar, (req, res) => {
       res.json({
         msg: "Conversa apagada com sucesso",
         deleted: result.affectedRows,
-      });
+      }); 
     },
   );
 });
 
 app.listen(3000, () =>
-  console.log("Servidor rodando em http://localhost:3000"),
+  console.log("Servidor a rodar:  (http://localhost:3000)"),
 );
