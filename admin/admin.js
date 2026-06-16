@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    // verificar role do user atual
+    // verificar o nivel de acesso do utilizador 
     const me = await fetchJson("/usuarios/id");
     if (me.role !== "admin") {
       mostrarAlerta("Acesso reservado a administradores", "#ff3b30");

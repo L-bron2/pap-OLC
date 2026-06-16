@@ -13,9 +13,8 @@ window.onload = async function () {
   const areaAdmin = document.getElementById("area_admin");
 
   if (!token) {
-    mostrarAlerta("Faça login para ver seus favoritos", "#ff3b30");
-    setTimeout(() => (window.location.href = "../Login/login.html"), 1500);
-    return;
+    window.location.href = "../login/login.html";
+    return
   }
 
   try {

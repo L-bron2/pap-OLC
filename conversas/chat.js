@@ -6,13 +6,12 @@ function getQueryParam(param) {
 //verifica se o utilizador esta logado e se tiver pode enviar mensagens
 window.onload = async function () {
   const areaAdmin = document.getElementById("area_admin");
+
+  //verifica se o utilizador esta loogado
   const token = localStorage.getItem("token");
   if (!token) {
-    mostrarAlerta("Faça login para poder acessar a essa página!");
-    return setTimeout(
-      () => (window.location.href = "../Login/login.html"),
-      1500,
-    );
+    window.location.href = "../login/login.html";
+    return
   }
 
   const listaConversas = document.getElementById("listaConversas");
