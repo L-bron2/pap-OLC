@@ -23,6 +23,18 @@ body {
   color: var(--texto);
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 92px;
+  background: var(--fundo);
+  z-index: 999;
+  pointer-events: none;
+}
+
 .container {
   min-height: 100vh;
   display: flex;
@@ -116,6 +128,7 @@ h1 {
   position: fixed;
   top: 22px;
   left: 22px;
+  z-index: 1000;
   display: grid;
   place-items: center;
   width: 48px;

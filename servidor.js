@@ -970,10 +970,12 @@ app.get("/favoritos", autenticar, (req, res) => {
 app.get("/mensagens", autenticar, (req, res) => {
   const id = req.userId;
   db.query(
-    `SELECT m.*, ru.nome AS remetente_nome, du.nome AS destinatario_nome
+    `SELECT m.*, ru.nome AS remetente_nome, du.nome AS destinatario_nome,
+            p.titulo AS produto_titulo, p.preco AS produto_preco, p.imagem_url AS produto_imagem_url
      FROM mensagens m
      LEFT JOIN usuarios ru ON ru.id = m.remetente_id
      LEFT JOIN usuarios du ON du.id = m.destinatario_id
+     LEFT JOIN produtos p ON p.id = m.produto_id
      WHERE remetente_id = ? OR destinatario_id = ?
      ORDER BY data_envio DESC`,
     [id, id],
@@ -991,10 +993,12 @@ app.get("/mensagens/conversa/:outro", autenticar, (req, res) => {
   if (isNaN(outro)) return res.status(400).json({ erro: "ID inválido" });
 
   db.query(
-    `SELECT m.*, ru.nome AS remetente_nome, du.nome AS destinatario_nome
+    `SELECT m.*, ru.nome AS remetente_nome, du.nome AS destinatario_nome,
+            p.titulo AS produto_titulo, p.preco AS produto_preco, p.imagem_url AS produto_imagem_url
      FROM mensagens m
      LEFT JOIN usuarios ru ON ru.id = m.remetente_id
      LEFT JOIN usuarios du ON du.id = m.destinatario_id
+     LEFT JOIN produtos p ON p.id = m.produto_id
      WHERE (remetente_id=? AND destinatario_id=?) OR (remetente_id=? AND destinatario_id=?)
      ORDER BY data_envio ASC`,
     [id, outro, outro, id],

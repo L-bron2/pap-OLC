@@ -37,6 +37,7 @@ window.onload = async function () {
   const fecharFiltro = document.getElementById("fecharFiltro");
   const limparFiltrosBtn = document.getElementById("limparFiltros");
   const aplicarFiltrosBtn = document.getElementById("aplicarFiltros");
+  const formularioFiltro = document.querySelector(".filtro-form");
 
   const home = document.getElementById("home");
   const chat = document.getElementById("chat");
@@ -46,6 +47,7 @@ window.onload = async function () {
 
   let todosProdutos = [];
   let produtosFiltrados = [];
+  let filtrosAtivos = false;
   let paginaAtual = 1;
   const produtosPorPagina = 12;
   const token = localStorage.getItem("token");
@@ -75,8 +77,64 @@ window.onload = async function () {
     botaoModal.onclick = null;
   }
 
+  function obterValorCampo(id) {
+    return document.getElementById(id)?.value || "";
+  }
+
+  function obterNumeroCampo(id, valorPadrao) {
+    const valor = parseFloat(obterValorCampo(id));
+    return Number.isFinite(valor) ? valor : valorPadrao;
+  }
+
+  function produtoCorrespondeAoTexto(produto, termo) {
+    if (!termo) return true;
+
+    const camposPesquisa = [
+      produto.titulo,
+      produto.descricao,
+      produto.categoria,
+      produto.usuario_nome,
+      produto.preco,
+    ];
+
+    return camposPesquisa.some((campo) =>
+      normalizarTexto(String(campo || "")).includes(termo),
+    );
+  }
+
+  function aplicarFiltrosEPesquisa() {
+    const termoTopo = normalizarTexto(campoPesquisa.value);
+    const termoModal = normalizarTexto(obterValorCampo("produtoFiltro"));
+    const termoProduto = termoModal || termoTopo;
+    const categoria = obterValorCampo("categoriaFiltro");
+    const minimo = obterNumeroCampo("precoMinimo", 0);
+    const maximo = obterNumeroCampo("precoMaximo", Infinity);
+
+    filtrosAtivos = Boolean(
+      termoTopo ||
+        termoModal ||
+        categoria ||
+        obterValorCampo("precoMinimo") ||
+        obterValorCampo("precoMaximo"),
+    );
+
+    produtosFiltrados = filtrosAtivos
+      ? todosProdutos.filter((produto) => {
+          const preco = Number(produto.preco) || 0;
+          if (!produtoCorrespondeAoTexto(produto, termoProduto)) return false;
+          if (categoria && produto.categoria !== categoria) return false;
+          if (preco < minimo || preco > maximo) return false;
+          return true;
+        })
+      : [];
+
+    paginaAtual = 1;
+    carregarProdutosPagina(paginaAtual);
+    carregarPaginacao();
+  }
+
   function obterListaAtual() {
-    return produtosFiltrados.length ? produtosFiltrados : todosProdutos;
+    return filtrosAtivos ? produtosFiltrados : todosProdutos;
   }
 
   async function carregarFavoritos() {
@@ -293,7 +351,18 @@ window.onload = async function () {
         mostrarAlerta("Faça login para conversar", "#ff9500", "aviso");
         return;
       }
-      window.location.href = `../conversas/chat.html?vendedor=${produto.usuario_id || produto.vendedor || ""}`;
+      const params = new URLSearchParams({
+        vendedor: produto.usuario_id || produto.vendedor || "",
+        produto: produto.id || produto._id || "",
+        nome: produto.usuario_nome || "Vendedor",
+        titulo: produto.titulo || "Produto",
+        preco: produto.preco || "",
+        img: produto.imagem_url
+          ? `http://localhost:3000${produto.imagem_url}`
+          : "",
+      });
+
+      window.location.href = `../conversas/chat.html?${params.toString()}`;
       modalProduto.style.display = "none";
     };
   }
@@ -307,6 +376,7 @@ window.onload = async function () {
       const select = document.getElementById(selectId);
       if (!select) return;
 
+      const valorAtual = select.value;
       select.innerHTML = "<option value=''>Todas categorias</option>";
       categorias.forEach((cat) => {
         const opcao = document.createElement("option");
@@ -314,6 +384,7 @@ window.onload = async function () {
         opcao.textContent = cat.categoria;
         select.appendChild(opcao);
       });
+      select.value = valorAtual;
     } catch (erro) {
       console.error(erro);
       mostrarAlerta("Erro ao carregar categorias", "#ff3b30");
@@ -336,58 +407,42 @@ window.onload = async function () {
   });
 
   limparFiltrosBtn.addEventListener("click", () => {
+    document.getElementById("produtoFiltro").value = "";
     document.getElementById("categoriaFiltro").value = "";
     document.getElementById("precoMinimo").value = "";
     document.getElementById("precoMaximo").value = "";
-    produtosFiltrados = [];
-    paginaAtual = 1;
-    carregarProdutosPagina(paginaAtual);
-    carregarPaginacao();
+    campoPesquisa.value = "";
+    filtrosAtivos = false;
+    aplicarFiltrosEPesquisa();
     modalFiltro.style.display = "none";
   });
 
   aplicarFiltrosBtn.addEventListener("click", () => {
-    const categoria = document.getElementById("categoriaFiltro").value;
-    const minimo = parseFloat(document.getElementById("precoMinimo").value) || 0;
-    const maximo = parseFloat(document.getElementById("precoMaximo").value) || Infinity;
-
-    produtosFiltrados = todosProdutos.filter((p) => {
-      const preco = Number(p.preco) || 0;
-      if (categoria && p.categoria !== categoria) return false;
-      if (preco < minimo || preco > maximo) return false;
-      return true;
-    });
-
-    paginaAtual = 1;
-    carregarProdutosPagina(paginaAtual);
-    carregarPaginacao();
+    const termoModal = document.getElementById("produtoFiltro").value;
+    campoPesquisa.value = termoModal;
+    aplicarFiltrosEPesquisa();
     modalFiltro.style.display = "none";
 
     mostrarAlerta(
-      produtosFiltrados.length > 0
-        ? `${produtosFiltrados.length} produto(s) encontrado(s)`
+      obterListaAtual().length > 0
+        ? `${obterListaAtual().length} produto(s) encontrado(s)`
         : "Nenhum resultado encontrado",
-      produtosFiltrados.length > 0 ? "#34c759" : "#ff9500",
+      obterListaAtual().length > 0 ? "#34c759" : "#ff9500",
     );
+  });
+
+  formularioFiltro.addEventListener("submit", (e) => {
+    e.preventDefault();
+    aplicarFiltrosBtn.click();
   });
 
   // Pesquisa 
   const pesquisaAguardada = aguardarPesquisa(() => {
-    const termo = normalizarTexto(campoPesquisa.value);
-
-    if (termo === "") {
-      produtosFiltrados = [];
-    } else {
-      produtosFiltrados = todosProdutos.filter(
-        (produto) =>
-          normalizarTexto(produto.titulo).includes(termo) ||
-          normalizarTexto(produto.descricao).includes(termo),
-      );
+    const produtoFiltro = document.getElementById("produtoFiltro");
+    if (produtoFiltro && produtoFiltro.value !== campoPesquisa.value) {
+      produtoFiltro.value = campoPesquisa.value;
     }
-
-    paginaAtual = 1;
-    carregarProdutosPagina(paginaAtual);
-    carregarPaginacao();
+    aplicarFiltrosEPesquisa();
   }, 300);
 
   campoPesquisa.addEventListener("input", pesquisaAguardada);

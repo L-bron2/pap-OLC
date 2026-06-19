@@ -23,6 +23,18 @@ body {
   color: var(--texto);
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 112px;
+  background: var(--fundo);
+  z-index: 999;
+  pointer-events: none;
+}
+
 .login {
   min-height: 100vh;
   display: flex;

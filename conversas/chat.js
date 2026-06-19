@@ -21,6 +21,10 @@ window.onload = async function () {
   const btnEnviar = document.getElementById("btnEnviar");
 
   let conversaAtiva = null;
+  const produtoInicialParam = getQueryParam("produto");
+  const produtoInicial = produtoInicialParam ? Number(produtoInicialParam) : null;
+  let produtoSelecionadoId =
+    produtoInicial && Number.isFinite(produtoInicial) ? produtoInicial : null;
 
   //verifica o id do utilizador a partir do token
   function getUserId() {
@@ -201,19 +205,7 @@ window.onload = async function () {
         return;
       }
 
-      msgs.forEach((m) => {
-        const div = document.createElement("div");
-        div.className =
-          "mensagem " + (m.remetente_id === getUserId() ? "me" : "their");
-        div.textContent = m.mensagem;
-
-        const horaDiv = document.createElement("div");
-        horaDiv.className = "hora";
-        horaDiv.textContent = new Date(m.data_envio).toLocaleString();
-
-        div.appendChild(horaDiv);
-        chatMensagens.appendChild(div);
-      });
+      msgs.forEach((m) => renderizarMensagem(m));
 
       chatMensagens.scrollTop = chatMensagens.scrollHeight;
     } catch (err) {
@@ -230,9 +222,6 @@ window.onload = async function () {
     if (isNaN(destinatario))
       return mostrarAlerta("ID do destinatário inválido");
 
-    const produtoQuery = getQueryParam("produto");
-    const produto_id = produtoQuery ? Number(produtoQuery) : null;
-
     try {
       const r = await fetch("http://localhost:3000/mensagens", {
         method: "POST",
@@ -243,7 +232,7 @@ window.onload = async function () {
         body: JSON.stringify({
           destinatario_id: destinatario,
           texto,
-          produto_id,
+          produto_id: produtoSelecionadoId,
         }),
       });
 
@@ -253,6 +242,8 @@ window.onload = async function () {
       }
 
       inputMensagem.value = "";
+      produtoSelecionadoId = null;
+      document.querySelector(".produto-preview")?.remove();
       carregarMensagensConversa();
       carregarConversas();
     } catch (err) {
@@ -275,6 +266,69 @@ window.onload = async function () {
   const produtoTituloParam = getQueryParam("titulo");
   const produtoPrecoParam = getQueryParam("preco");
   const produtoImgParam = getQueryParam("img");
+
+  function criarReferenciaProduto(produto) {
+    const titulo = produto.produto_titulo || produto.titulo || "";
+    const preco = produto.produto_preco ?? produto.preco ?? "";
+    const imagem = produto.produto_imagem_url || produto.imagem_url || "";
+    const imgUrl = imagem && imagem.startsWith("/")
+      ? `http://localhost:3000${imagem}`
+      : imagem;
+
+    if (!produto.produto_id && !titulo && !preco && !imgUrl) return null;
+
+    const ref = document.createElement("div");
+    ref.className = "mensagem-produto";
+
+    if (imgUrl) {
+      const img = document.createElement("img");
+      img.src = imgUrl;
+      img.alt = titulo || "Produto";
+      ref.appendChild(img);
+    }
+
+    const info = document.createElement("div");
+    info.className = "mensagem-produto-info";
+
+    const label = document.createElement("span");
+    label.className = "mensagem-produto-label";
+    label.textContent = "Produto";
+    info.appendChild(label);
+
+    const nome = document.createElement("strong");
+    nome.textContent = titulo || `Produto #${produto.produto_id}`;
+    info.appendChild(nome);
+
+    if (preco !== "" && preco !== null && preco !== undefined) {
+      const precoEl = document.createElement("span");
+      precoEl.className = "mensagem-produto-preco";
+      precoEl.textContent = `${preco}€`;
+      info.appendChild(precoEl);
+    }
+
+    ref.appendChild(info);
+    return ref;
+  }
+
+  function renderizarMensagem(m) {
+    const div = document.createElement("div");
+    div.className =
+      "mensagem " + (m.remetente_id === getUserId() ? "me" : "their");
+
+    const produtoRef = criarReferenciaProduto(m);
+    if (produtoRef) div.appendChild(produtoRef);
+
+    const textoDiv = document.createElement("div");
+    textoDiv.textContent = m.mensagem;
+    div.appendChild(textoDiv);
+
+    const horaDiv = document.createElement("div");
+    horaDiv.className = "hora";
+    horaDiv.textContent = new Date(m.data_envio).toLocaleString();
+
+    div.appendChild(horaDiv);
+    chatMensagens.appendChild(div);
+  }
 
   function showProductPreview(titulo, preco, img) {
     if (!titulo && !preco && !img) return;
@@ -313,7 +367,12 @@ window.onload = async function () {
         const msgs = chatArea.querySelector(".chat-mensagens");
         chatArea.insertBefore(preview, msgs);
         const close = preview.querySelector(".preview-close");
-        if (close) close.addEventListener("click", () => preview.remove());
+        if (close) {
+          close.addEventListener("click", () => {
+            produtoSelecionadoId = null;
+            preview.remove();
+          });
+        }
       }
     }
   }
@@ -330,8 +389,22 @@ window.onload = async function () {
         `http://localhost:3000/usuarios/${encodeURIComponent(vendedorQuery)}`,
       )
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((data) => abrirConversa(vendedorQuery, data.nome || "Vendedor"))
-        .catch(() => abrirConversa(vendedorQuery, "Vendedor"));
+        .then((data) => {
+          abrirConversa(vendedorQuery, data.nome || "Vendedor");
+          showProductPreview(
+            produtoTituloParam ? decodeURIComponent(produtoTituloParam) : null,
+            produtoPrecoParam ? decodeURIComponent(produtoPrecoParam) : null,
+            produtoImgParam ? decodeURIComponent(produtoImgParam) : null,
+          );
+        })
+        .catch(() => {
+          abrirConversa(vendedorQuery, "Vendedor");
+          showProductPreview(
+            produtoTituloParam ? decodeURIComponent(produtoTituloParam) : null,
+            produtoPrecoParam ? decodeURIComponent(produtoPrecoParam) : null,
+            produtoImgParam ? decodeURIComponent(produtoImgParam) : null,
+          );
+        });
     }
   }
 };

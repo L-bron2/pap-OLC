@@ -111,10 +111,18 @@ window.onload = async function () {
         const vendedorId = produto.vendedor;
 
         modalBTN.onclick = () => {
-          const url = `../conversas/chat.html?vendedor=${vendedorId}&produto=${
-            produto.id
-          }&nome=${encodeURIComponent(produto.usuario_nome || "Vendedor")}`;
-          window.location.href = url;
+          const params = new URLSearchParams({
+            vendedor: vendedorId,
+            produto: produto.id,
+            nome: produto.usuario_nome || "Vendedor",
+            titulo: produto.titulo || "Produto",
+            preco: produto.preco || "",
+            img: produto.imagem_url
+              ? `http://localhost:3000${produto.imagem_url}`
+              : "",
+          });
+
+          window.location.href = `../conversas/chat.html?${params.toString()}`;
         };
       });
 

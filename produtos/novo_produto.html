@@ -18,41 +18,84 @@
         <img src="../favicon/Favicon final.png" alt="Logo Trovix" />
         <span>Trovix</span>
       </a>
-      <ul class="navbar-links">
+      <ul class="navbar-links" aria-label="Navega&ccedil;&atilde;o principal">
         <li>
-          <a href="../inicio/inicio.html"><span class="material-symbols-outlined">home</span></a>
+          <a href="../inicio/inicio.html" aria-label="In&iacute;cio"><span class="material-symbols-outlined">home</span></a>
         </li>
         <li>
-          <a href="../conversas/chat.html"><span class="material-symbols-outlined">chat</span></a>
+          <a href="../conversas/chat.html" aria-label="Conversas"><span class="material-symbols-outlined">chat</span></a>
         </li>
         <li>
-          <a href="../favoritos/favoritos.html"><span class="material-symbols-outlined">favorite</span></a>
+          <a href="../favoritos/favoritos.html" aria-label="Favoritos"><span class="material-symbols-outlined">favorite</span></a>
         </li>
         <li>
-          <a href="../Perfil/perfil.html"><span class="material-symbols-outlined">account_circle</span></a>
+          <a href="../Perfil/perfil.html" aria-label="Perfil"><span class="material-symbols-outlined">account_circle</span></a>
         </li>
       </ul>
     </nav>
 
-    <div class="adicionarProdutos">
-      <h1>Novo produto</h1>
+    <main class="pagina-produto">
+      <a href="../inicio/inicio.html" class="BTN_voltar" aria-label="Voltar ao in&iacute;cio">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
 
-      <form id="formProduto">
-        <input type="text" id="titulo" class="input" placeholder="Título do produto" required />
-        <textarea id="descricao" class="textarea" placeholder="Descrição do produto"></textarea>
-        <input type="number" step="0.01" id="preco" class="input" placeholder="Preço do produto" required />
+      <section class="adicionarProdutos" aria-labelledby="tituloPagina">
+        <div class="form-header">
+          <span class="material-symbols-outlined">add_box</span>
+          <div>
+            <p>Novo an&uacute;ncio</p>
+            <h1 id="tituloPagina">Adicionar produto</h1>
+          </div>
+        </div>
 
-        <select class="Categoria" id="categoriaSelect" required>
-          <option value="">Selecione uma categoria</option>
-        </select>
+        <form id="formProduto" novalidate>
+          <div class="campo">
+            <label for="titulo">T&iacute;tulo do produto</label>
+            <input type="text" id="titulo" class="input" placeholder="Ex: Mochila escolar" required />
+          </div>
 
-        <input type="file" id="imagem" class="input" accept="image/*" required />
-        <button type="submit" class="BTN">Adicionar produto</button>
-      </form>
-    </div>
+          <div class="campo">
+            <label for="descricao">Descri&ccedil;&atilde;o</label>
+            <textarea id="descricao" class="textarea" placeholder="Estado, detalhes importantes e o que inclui" required></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="campo">
+              <label for="preco">Pre&ccedil;o</label>
+              <div class="input-com-icone">
+                <span>EUR</span>
+                <input type="number" step="0.01" min="0.01" id="preco" class="input" placeholder="0.00" required />
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="categoriaSelect">Categoria</label>
+              <select class="Categoria" id="categoriaSelect" required>
+                <option value="">Selecione uma categoria</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="imagem">Imagem do produto</label>
+            <label class="upload-box" for="imagem">
+              <input type="file" id="imagem" accept="image/*" required />
+              <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+              <strong id="imagemTexto">Escolher imagem</strong>
+              <small>PNG, JPG, WEBP ou AVIF</small>
+              <img id="imagemPreview" alt="" />
+            </label>
+          </div>
+
+          <button type="submit" class="BTN">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Adicionar produto</span>
+          </button>
+        </form>
+      </section>
+    </main>
 
     <div class="alerta" id="alerta" style="display: none"></div>
-    <a href="../inicio/inicio.html" class="BTN_voltar">&#8592;</a>
   </div>
 
   <script src="../shared/alerts.js"></script>
