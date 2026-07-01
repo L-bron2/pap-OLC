@@ -44,7 +44,6 @@ window.onload = async function () {
   const perfil = document.getElementById("perfil");
   const favorito = document.getElementById("Favorito");
 
-
   let todosProdutos = [];
   let produtosFiltrados = [];
   let filtrosAtivos = false;
@@ -112,10 +111,10 @@ window.onload = async function () {
 
     filtrosAtivos = Boolean(
       termoTopo ||
-        termoModal ||
-        categoria ||
-        obterValorCampo("precoMinimo") ||
-        obterValorCampo("precoMaximo"),
+      termoModal ||
+      categoria ||
+      obterValorCampo("precoMinimo") ||
+      obterValorCampo("precoMaximo"),
     );
 
     produtosFiltrados = filtrosAtivos
@@ -138,7 +137,7 @@ window.onload = async function () {
   }
 
   async function carregarFavoritos() {
-    if (!token)  return;
+    if (!token) return;
     try {
       const resposta = await fetch("http://localhost:3000/favoritos", {
         headers: { Authorization: "Bearer " + token },
@@ -436,7 +435,7 @@ window.onload = async function () {
     aplicarFiltrosBtn.click();
   });
 
-  // Pesquisa 
+  // Pesquisa
   const pesquisaAguardada = aguardarPesquisa(() => {
     const produtoFiltro = document.getElementById("produtoFiltro");
     if (produtoFiltro && produtoFiltro.value !== campoPesquisa.value) {

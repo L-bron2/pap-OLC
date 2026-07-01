@@ -19,7 +19,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
 /* BODY */
@@ -65,8 +66,12 @@ body::before {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* NAVBAR */
@@ -92,8 +97,7 @@ nav {
   border-radius: 18px;
   border: 1px solid var(--borda);
 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* LOGO */
@@ -131,7 +135,7 @@ ul.navbar-links li a {
 }
 
 ul.navbar-links li a:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--texto);
 }
 
@@ -139,26 +143,26 @@ h3 {
   position: fixed;
   align-items: center;
   justify-self: center;
-  top: 20%;
+  top: 15%;
   font-size: 2rem;
   transition: 0.4s ease;
   transition: text-decoration 0.3s;
 }
 
 h3::after {
- content: '';
+  content: "";
   position: absolute;
   width: 100%;
   height: 2px;
   bottom: 0;
   left: 0;
   background-color: #000;
-  transform: scaleX(0); 
-  transition: transform 0.3s ease; 
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 h3:hover::after {
-  transform: scaleX(1); 
+  transform: scaleX(1);
 }
 
 /* LOGIN CARD*/
@@ -178,7 +182,7 @@ h3:hover::after {
   align-items: center;
   gap: 20px;
 
-  box-shadow: 0 25px 70px rgba(0,0,0,0.15);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
 
   margin-top: 100px;
 
@@ -229,8 +233,8 @@ h1 {
 }
 
 .input:focus {
-  border-color: rgba(0,0,0,0.2);
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
   outline: none;
 }
 
@@ -283,7 +287,7 @@ h1 {
   padding: 14px 20px;
   border-radius: 10px;
 
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 
   opacity: 0;
   transition: 0.3s;

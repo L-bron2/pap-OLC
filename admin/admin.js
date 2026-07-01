@@ -184,6 +184,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         mostrarAlerta(err.message || "Erro", "#ff3b30");
       }
     });
+
+    const modalUserProd = document.get
   // botão para fechar o painel de detalhe
   const closeBtn = document.getElementById("fecharDetalhes");
   if (closeBtn) {

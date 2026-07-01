@@ -50,7 +50,7 @@ const db = mysql.createConnection({
   host: process.env.host,
   user: process.env.user,
   password: process.env.password,
-  database: process.env.database
+  database: process.env.database,
 });
 
 db.connect((err) => {
@@ -66,7 +66,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.email_pass,
   },
 });
-
 
 // Template unico para os emails da aplicacao. Mantem o mesmo esilo
 function criarTemplateEmail({ titulo, subtitulo, texto, botao, link }) {
@@ -504,7 +503,7 @@ app.get("/usuarios/:id", (req, res) => {
 });
 
 // Rota administrativa apagar um utilizador pelo id (apaga produtos, favoritos, mensagens e imagem de perfil)
-// Apenas administradores 
+// Apenas administradores
 app.delete("/usuarios/:id", autenticar, autorizarAdmin, (req, res) => {
   const targetId = parseInt(req.params.id);
   if (isNaN(targetId)) return res.status(400).json({ erro: "ID inválido" });
@@ -1105,7 +1104,7 @@ app.delete("/mensagens/conversa/:outro", autenticar, (req, res) => {
       res.json({
         msg: "Conversa apagada com sucesso",
         deleted: result.affectedRows,
-      }); 
+      });
     },
   );
 });
