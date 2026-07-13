@@ -5,6 +5,20 @@ if (!token) {
   window.location.href = "../Login/login.html";
 }
 
+// async function abrirModal(modal) {
+//   e.stopPropagation();
+//   let produtoSelecionado = null;
+
+//   produtoSelecionado = produto;
+//   //recebe os novos dados dos produtos
+//   const titulo = (document.getElementById("editTitulo").value = produto.titulo);
+//   const descricao = (document.getElementById("editDescricao").value =
+//     produto.descricao);
+//   const preço = (document.getElementById("editPreco").value = produto.preco);
+//   //abri o modal para atulizar os dados dos produtos
+//   const modal = (document.getElementById("modalEditar").style.display = "flex");
+// }
+
 // Carregar dados do utilizador
 async function carregarPerfil() {
   try {
@@ -54,7 +68,7 @@ async function carregarPerfil() {
                     </button>
                 </div>
                 <div class="user-email">${email}</div>
-                <div class="user-since">Desde: ${dataFmt}</div>
+                
                 <div class="edit-actions">
                     <button id="btnEditar" class="btn btn-edit">Editar bio</button>
                     <button id="btnAtualizarFoto" class="btn" style="background:var(--cor-roxo);color:#fff">Atualizar foto</button>
@@ -73,7 +87,7 @@ async function carregarPerfil() {
       profileCard.appendChild(inputImagem);
     }
 
-    // O botao de editar nome 
+    // O botao de editar nome
     const editarNome = document.getElementById("EditNome");
 
     // editar nome
@@ -150,6 +164,11 @@ async function carregarPerfil() {
                 <div class="produto-preco">${produto.preco}€</div>
               `;
 
+              const btnEditar = document.createElement("btnEditar");
+              btnEditar.addEventListener("click", async (e) => {
+                e.preventDefault();
+              });
+
               // botão para apagar produto
               const btnApagar = document.createElement("button");
               btnApagar.className = "btn btn-delete";
@@ -161,7 +180,7 @@ async function carregarPerfil() {
                 e.stopPropagation();
                 const confirmar = await confirmarAcao({
                   titulo: "Apagar produto?",
-                  mensagem: `Deseja apagar o produto "${produto.titulo}"? Esta acao e irreversivel.`,
+                  mensagem: `Deseja apagar o produto "${produto.titulo}"? Esta ação é irreversível.`,
                   confirmarTexto: "Apagar produto",
                 });
                 if (!confirmar) {
@@ -171,10 +190,10 @@ async function carregarPerfil() {
 
                 try {
                   console.log(
-                    "Deletando produto:",
+                    "A apagar produto:",
                     produto.id,
                     "Token:",
-                    token ? "OK" : "MISSING"
+                    token ? "OK" : "MISSING",
                   );
                   const resp = await fetch(
                     `http://localhost:3000/produtos/${produto.id}`,
@@ -184,7 +203,7 @@ async function carregarPerfil() {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                       },
-                    }
+                    },
                   );
 
                   // Ler resposta como texto primeiro
@@ -193,7 +212,7 @@ async function carregarPerfil() {
                     "Resposta do servidor (status:",
                     resp.status,
                     "):",
-                    texto
+                    texto,
                   );
 
                   let body = {};
@@ -204,7 +223,7 @@ async function carregarPerfil() {
                       "Erro ao parsear JSON:",
                       e.message,
                       "Texto recebido:",
-                      texto
+                      texto,
                     );
                     mostrarAlerta("resposta inválida do servidor", "#ff3b30");
                     return;
@@ -216,7 +235,7 @@ async function carregarPerfil() {
                         (body.erro ||
                           body.msg ||
                           `Falha ao apagar produto (${resp.status})`),
-                      "#ff3b30"
+                      "#ff3b30",
                     );
                     return;
                   }
@@ -260,18 +279,20 @@ async function carregarPerfil() {
       });
     }
 
-    // Botão apagar conta 
+    // Botão apagar conta
     const apagarContaEl = document.getElementById("apagarConta");
     let apagarContaBtn = null;
     if (apagarContaEl) {
       if (apagarContaEl.tagName === "BUTTON") apagarContaBtn = apagarContaEl;
-      else apagarContaBtn = apagarContaEl.querySelector("button") || apagarContaEl;
+      else
+        apagarContaBtn = apagarContaEl.querySelector("button") || apagarContaEl;
     }
     if (apagarContaBtn) {
       apagarContaBtn.addEventListener("click", async () => {
         const confirmar = await confirmarAcao({
           titulo: "Apagar conta?",
-          mensagem: "Esta acao e irreversivel e vai remover os seus produtos, mensagens, favoritos e a conta permanentemente.",
+          mensagem:
+            "Esta ação é irreversível e vai remover os seus produtos, mensagens, favoritos e a conta permanentemente.",
           confirmarTexto: "Apagar conta",
         });
         if (!confirmar) {
@@ -293,14 +314,14 @@ async function carregarPerfil() {
           if (!response.ok) {
             mostrarAlerta(
               "Erro: " + (data.erro || "Falha ao apagar conta"),
-              "#ff3b30"
+              "#ff3b30",
             );
             return;
           }
 
           mostrarAlerta(
             "Conta apagada com sucesso! A redirecionar...",
-            "#4caf50"
+            "#4caf50",
           );
           setTimeout(() => {
             localStorage.removeItem("token");
@@ -347,12 +368,16 @@ async function carregarPerfil() {
           if (resposta.ok) {
             mostrarAlerta(
               resultado.msg || "Foto atualizada com sucesso!",
-              "#4BB543"
+              "#4BB543",
             );
             const avatarImg = document.getElementById("avatarImg");
-            if (avatarImg && resultado.foto_url) avatarImg.src = resultado.foto_url;
+            if (avatarImg && resultado.foto_url)
+              avatarImg.src = resultado.foto_url;
           } else {
-            mostrarAlerta(resultado.erro || "Erro ao atualizar foto.", "#ff3b30");
+            mostrarAlerta(
+              resultado.erro || "Erro ao atualizar foto.",
+              "#ff3b30",
+            );
           }
         } catch (err) {
           mostrarAlerta("Erro de conexão: " + err.message, "#ff3b30");
@@ -432,9 +457,13 @@ async function carregarPerfil() {
 
         if (btnGuardar) {
           btnGuardar.addEventListener("click", async () => {
-            const novoTexto = document.getElementById("descricaoInput").value.trim();
+            const novoTexto = document
+              .getElementById("descricaoInput")
+              .value.trim();
             // Atualizar DOM
-            if (bioText) bioText.innerText = novoTexto || "Adicione uma descrição sobre si mesmo.";
+            if (bioText)
+              bioText.innerText =
+                novoTexto || "Adicione uma descrição sobre si mesmo.";
             area.remove();
 
             try {
@@ -454,7 +483,7 @@ async function carregarPerfil() {
             } catch (err) {
               mostrarAlerta(
                 "Não foi possível guardar no servidor. Atualizado localmente.",
-                "#ffb84d"
+                "#ffb84d",
               );
             }
           });

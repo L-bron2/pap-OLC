@@ -99,8 +99,7 @@ async function enviarEmailContaCriada(userEmail, userName) {
     html: criarTemplateEmail({
       titulo: `Bem-vindo/a, ${userName}!`,
       subtitulo: "A sua conta Trovix ja esta pronta.",
-      texto:
-        "A conta foi criada com sucesso. Pode entrar no site, explorar produtos, guardar favoritos e conversar com vendedores.",
+      texto: "A conta foi criada com sucesso. Aproveite o nosso site .",
       botao: "Aceder ao site",
       link: linkLogin,
     }),
