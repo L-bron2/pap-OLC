@@ -5,20 +5,8 @@ if (!token) {
   window.location.href = "../Login/login.html";
 }
 
-// async function abrirModal(modal) {
-//   e.stopPropagation();
-//   let produtoSelecionado = null;
-
-//   produtoSelecionado = produto;
-//   //recebe os novos dados dos produtos
-//   const titulo = (document.getElementById("editTitulo").value = produto.titulo);
-//   const descricao = (document.getElementById("editDescricao").value =
-//     produto.descricao);
-//   const preço = (document.getElementById("editPreco").value = produto.preco);
-//   //abri o modal para atulizar os dados dos produtos
-//   const modal = (document.getElementById("modalEditar").style.display = "flex");
-// }
-
+let cardAtual = null;
+let produtoAtual = null;
 // Carregar dados do utilizador
 async function carregarPerfil() {
   try {
@@ -248,6 +236,37 @@ async function carregarPerfil() {
                 }
               });
 
+              //btn Editar Produto
+              const btnEditarP = document.createElement("button");
+              btnEditarP.className = "btn btn-editar";
+              btnEditarP.style.marginTop = "8px";
+              btnEditarP.style.gap = "5px";
+              btnEditarP.innerText = "Editar";
+              btnEditarP.addEventListener("click", (e) => {
+                e.stopPropagation();
+
+                cardAtual = card;
+                produtoAtual = produto;
+
+                document.getElementById("modalEditarProduto").style.display =
+                  "flex";
+
+                document.getElementById("produtoId").value = produto.id;
+                document.getElementById("editarTitulo").value = produto.titulo;
+                document.getElementById("editarPreco").value = produto.preco;
+                document.getElementById("editarDescricao").value =
+                  produto.descricao;
+
+                const modal = document.getElementById("modalEditarProduto");
+
+                modal.addEventListener("click", (e) => {
+                  if (e.target === modal) {
+                    modal.style.display = "none";
+                  }
+                });
+              });
+
+              card.appendChild(btnEditarP);
               card.appendChild(btnApagar);
               grid.appendChild(card);
             });
@@ -496,6 +515,40 @@ async function carregarPerfil() {
   }
 }
 
+//editar produtos
+async function editarProduto() {
+  // Guardar alterações do produto (btn editar)
+  document
+    .getElementById("guardarEdicao")
+    .addEventListener("click", async () => {
+      const id = document.getElementById("produtoId").value;
+      const titulo = document.getElementById("editarTitulo").value;
+      const preco = document.getElementById("editarPreco").value;
+      const descricao = document.getElementById("editarDescricao").value;
+
+      const resposta = await fetch(`http://localhost:3000/produtos/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          titulo,
+          preco,
+          descricao,
+        }),
+      });
+      if (resposta.ok) {
+        document.getElementById("modalEditarProduto").style.display = "none";
+        mostrarAlerta("Produto atualizado com sucesso!", "#4BB543");
+        carregarPerfil();
+      } else {
+        mostrarAlerta("Erro ao atualizar produto", "#ff3b30");
+      }
+    });
+}
+
 window.onload = function () {
   carregarPerfil();
+  editarProduto();
 };

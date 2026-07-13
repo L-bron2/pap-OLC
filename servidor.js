@@ -694,6 +694,37 @@ app.post("/produtos", autenticar, upload.single("imagem"), (req, res) => {
   );
 });
 
+//editar produtos
+app.patch("/produtos/:id", (req, res) => {
+  const id = req.params.id;
+  const { titulo, preco, descricao } = req.body;
+
+  const sql = `
+        UPDATE produtos
+        SET titulo = ?, preco = ?, descricao = ?
+        WHERE id = ?
+    `;
+
+  db.query(sql, [titulo, preco, descricao, id], (err, resultado) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({
+        erro: "Erro ao atualizar produto.",
+      });
+    }
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        erro: "Produto não encontrado.",
+      });
+    }
+
+    res.json({
+      msg: "Produto atualizado com sucesso!",
+    });
+  });
+});
+
 // categorias disponíveis
 app.get("/categorias", (req, res) => {
   db.query("SELECT DISTINCT categoria FROM produtos", (err, rows) => {
